@@ -68,146 +68,119 @@
 const API_URL = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW = 'https://github.com/zCrazMaex/F1_Intro/main/assets/drivers';
 
-let gridData = null;
-let lastUpdatedAt = null;
-let revealInterval = null;
+const DRIVER_TEMPLATES = [
+  { name: 'Max Verstappen', team: 'Red Bull Racing', number: 1, assetKey: 'verstappen' },
+  { name: 'Liam Lawson', team: 'Red Bull Racing', number: 30, assetKey: 'lawson' },
+  { name: 'Lando Norris', team: 'McLaren', number: 4, assetKey: 'norris' },
+  { name: 'Oscar Piastri', team: 'McLaren', number: 81, assetKey: 'piastri' },
+  { name: 'Charles Leclerc', team: 'Ferrari', number: 16, assetKey: 'leclerc' },
+  { name: 'Lewis Hamilton', team: 'Ferrari', number: 44, assetKey: 'hamilton' },
+  { name: 'George Russell', team: 'Mercedes', number: 63, assetKey: 'russell' },
+  { name: 'Andrea Kimi Antonelli', team: 'Mercedes', number: 12, assetKey: 'antonelli' },
+  { name: 'Fernando Alonso', team: 'Aston Martin', number: 14, assetKey: 'alonso' },
+  { name: 'Lance Stroll', team: 'Aston Martin', number: 18, assetKey: 'stroll' },
+  { name: 'Pierre Gasly', team: 'Alpine', number: 10, assetKey: 'gasly' },
+  { name: 'Jack Doohan', team: 'Alpine', number: 7, assetKey: 'doohan' },
+  { name: 'Nico Hülkenberg', team: 'Sauber/Audi', number: 27, assetKey: 'hulkenberg' },
+  { name: 'Gabriel Bortoleto', team: 'Sauber/Audi', number: 5, assetKey: 'bortoleto' },
+  { name: 'Carlos Sainz', team: 'Williams', number: 55, assetKey: 'sainz' },
+  { name: 'Alexander Albon', team: 'Williams', number: 23, assetKey: 'albon' },
+  { name: 'Yuki Tsunoda', team: 'RB', number: 22, assetKey: 'tsunoda' },
+  { name: 'Isack Hadjar', team: 'RB', number: 6, assetKey: 'hadjar' },
+  { name: 'Esteban Ocon', team: 'Haas', number: 31, assetKey: 'ocon' },
+  { name: 'Oliver Bearman', team: 'Haas', number: 87, assetKey: 'bearman' },
+];
 
-// ── Grid laden & auf Änderungen prüfen ──
-async function checkForUpdates() {
+let currentGrid = [];
+
+function renderTable(drivers) {
+  const tbody = document.getElementById('gridBody');
+  tbody.innerHTML = '';
+  drivers.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    if (d.position === 11) tr.className = 'p10-divider';
+    const portraitUrl = `${GITHUB_RAW}/${d.assetKey}/portrait.png`;
+    tr.innerHTML = `
+      <td class="pos">${d.position}</td>
+      <td>
+        <select onchange="applyTemplate(${i}, this.value)">
+          <option value="">-- Fahrer wählen --</option>
+          ${DRIVER_TEMPLATES.map(t =>
+            `<option value="${t.assetKey}" ${t.assetKey === d.assetKey ? 'selected' : ''}>${t.name}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td><input type="text" value="${d.team}" oninput="updateDriver(${i}, 'team', this.value)" placeholder="Team"></td>
+      <td><input type="text" value="${d.number}" oninput="updateDriver(${i}, 'number', this.value)" style="width:60px"></td>
+      <td><input type="text" value="${d.assetKey}" oninput="updateDriver(${i}, 'assetKey', this.value)" placeholder="ordnername"></td>
+      <td><img class="preview-img" src="${portraitUrl}" onerror="this.src='https://placehold.co/30x40/1a1a2e/e10600?text=?'" alt=""></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function applyTemplate(index, assetKey) {
+  const template = DRIVER_TEMPLATES.find(t => t.assetKey === assetKey);
+  if (!template) return;
+  currentGrid[index] = { ...currentGrid[index], ...template };
+  renderTable(currentGrid);
+}
+
+function updateDriver(index, field, value) {
+  currentGrid[index][field] = value;
+}
+
+async function loadGrid() {
   try {
     const res = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
-    const newData = await res.json();
-
-    // Nur neu starten wenn sich updatedAt geändert hat
-    if (newData.updatedAt !== lastUpdatedAt) {
-      console.log('Neues Grid erkannt, starte Overlay neu...');
-      lastUpdatedAt = newData.updatedAt;
-      gridData = newData;
-      restartOverlay();
-    }
+    const data = await res.json();
+    document.getElementById('raceName').value = data.race || '';
+    currentGrid = data.drivers;
+    renderTable(currentGrid);
+    document.getElementById('lastSaved').textContent =
+      `Zuletzt gespeichert: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
   } catch (err) {
-    console.error('Fehler beim Laden:', err);
+    showStatus('Fehler beim Laden: ' + err.message, 'error');
+    // Fallback: leeres Grid mit 22 Plätzen
+    currentGrid = Array.from({length: 22}, (_, i) => ({
+      position: i + 1,
+      name: DRIVER_TEMPLATES[i]?.name || `Fahrer ${i+1}`,
+      team: DRIVER_TEMPLATES[i]?.team || 'Team',
+      number: DRIVER_TEMPLATES[i]?.number || i+1,
+      assetKey: DRIVER_TEMPLATES[i]?.assetKey || 'placeholder'
+    }));
+    renderTable(currentGrid);
   }
 }
 
-// ── Overlay komplett neu aufbauen & Animation starten ──
-function restartOverlay() {
-  // Laufende Animation stoppen
-  if (revealInterval) {
-    clearInterval(revealInterval);
-    revealInterval = null;
-  }
-
-  // Titel setzen
-  const title = document.getElementById('race-title');
-  title.textContent = gridData.race;
-  title.classList.add('visible');
-
-  // Overlay neu aufbauen
-  buildOverlay();
-
-  // Animation nach kurzer Pause starten
-  setTimeout(startReveal, 1000);
-}
-
-// ── Overlay aufbauen ──
-function buildOverlay() {
-  const overlay = document.getElementById('grid-overlay');
-  overlay.innerHTML = '';
-
-  const bottomSection = createSection('P22 – P11', gridData.drivers.slice(10, 22).reverse());
-  overlay.appendChild(bottomSection);
-
-  const divider = document.createElement('div');
-  divider.style.cssText = 'width:1800px; height:2px; background:#e10600; margin:10px 0; opacity:0.4;';
-  overlay.appendChild(divider);
-
-  const topSection = createSection('TOP 10', gridData.drivers.slice(0, 10).reverse());
-  overlay.appendChild(topSection);
-}
-
-function createSection(label, drivers) {
-  const section = document.createElement('div');
-  section.className = 'section';
-
-  const lbl = document.createElement('div');
-  lbl.className = 'section-label';
-  lbl.textContent = label;
-  section.appendChild(lbl);
-
-  drivers.forEach(driver => {
-    section.appendChild(createDriverRow(driver));
-  });
-
-  return section;
-}
-
-function createDriverRow(driver) {
-  const row = document.createElement('div');
-  row.className = 'driver-row';
-  row.id = `driver-p${driver.position}`;
-
-  const assetBase = `${GITHUB_RAW}/${driver.assetKey}`;
-
-  row.innerHTML = `
-    <div class="position-box">P${driver.position}</div>
-    <div class="driver-info driver-animated">
-      <video class="driver-video" autoplay muted loop playsinline>
-        <source src="${assetBase}/video.mp4" type="video/mp4">
-      </video>
-      <span class="driver-number">#${driver.number}</span>
-      <div>
-        <div class="driver-name">${driver.name}</div>
-        <div class="driver-team">${driver.team}</div>
-      </div>
-      <img class="driver-portrait"
-           src="${assetBase}/portrait.png"
-           onerror="this.src='https://placehold.co/80x90/1a1a2e/e10600?text=${driver.number}'"
-           alt="${driver.name}">
-    </div>
-  `;
-
-  return row;
-}
-
-// ── Reveal Animation ──
-function startReveal() {
-  const bottomOrder = [];
-  for (let i = 22; i >= 11; i -= 2) bottomOrder.push([i, i - 1]);
-
-  const topOrder = [];
-  for (let i = 10; i >= 1; i -= 2) topOrder.push([i, i - 1]);
-
-  const allSteps = [...bottomOrder, null, ...topOrder]; // null = Pause
-  let step = 0;
-
-  revealInterval = setInterval(() => {
-    if (step >= allSteps.length) {
-      clearInterval(revealInterval);
-      revealInterval = null;
-      return;
-    }
-
-    const current = allSteps[step];
-    step++;
-
-    if (current === null) return; // Pause überspringen (1 Tick = 2s)
-
-    current.forEach(pos => {
-      const el = document.getElementById(`driver-p${pos}`);
-      if (el) {
-        el.classList.add('reveal');
-        const video = el.querySelector('video');
-        if (video) video.play();
-      }
+async function saveGrid() {
+  const payload = {
+    race: document.getElementById('raceName').value,
+    drivers: currentGrid
+  };
+  try {
+    const res = await fetch(`${API_URL}/api/grid`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
-
-  }, 2000);
+    const data = await res.json();
+    showStatus('✅ Gespeichert! OBS-Overlay wird automatisch aktualisiert.', 'success');
+    document.getElementById('lastSaved').textContent =
+      `Zuletzt gespeichert: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
+  } catch (err) {
+    showStatus('Fehler beim Speichern: ' + err.message, 'error');
+  }
 }
 
-// ── Start + alle 5 Sekunden auf Updates prüfen ──
-checkForUpdates();
-setInterval(checkForUpdates, 5000);
+function showStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = `status ${type}`;
+  setTimeout(() => el.className = 'status', 4000);
+}
+
+loadGrid();
   
 </script>
 </body>
