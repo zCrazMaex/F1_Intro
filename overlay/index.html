@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>F1 Grid Overlay</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1920px; height: 1080px;
+      background: transparent;
+      overflow: hidden;
+      font-family: 'Formula1', 'Arial Black', sans-serif;
+    }
+
+    /* ── GRID CONTAINER ── */
+    #grid-overlay {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      gap: 0;
+    }
+
+    /* ── RENNNAME OBEN ── */
+    #race-title {
+      position: absolute; top: 40px; left: 0; right: 0;
+      text-align: center;
+      color: #fff; font-size: 2rem; letter-spacing: 4px;
+      text-transform: uppercase;
+      opacity: 0; transform: translateY(-20px);
+      transition: all 0.6s ease;
+    }
+    #race-title.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── DRIVER CARD ── */
+    .driver-row {
+      display: flex; width: 1800px;
+      height: 90px; margin: 3px 0;
+      opacity: 0; transform: translateX(-60px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .driver-row.reveal { opacity: 1; transform: translateX(0); }
+
+    .position-box {
+      width: 80px; height: 90px;
+      background: #e10600;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; font-weight: 900; color: #fff;
+      clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+      flex-shrink: 0;
+    }
+
+    .driver-info {
+      flex: 1; height: 90px;
+      background: rgba(10, 10, 20, 0.92);
+      border-left: 3px solid #e10600;
+      display: flex; align-items: center;
+      padding: 0 20px; gap: 20px;
+      position: relative; overflow: hidden;
+    }
+
+    .driver-number {
+      font-size: 1.4rem; color: #e10600;
+      font-weight: 900; width: 50px;
+    }
+
+    .driver-name {
+      font-size: 1.6rem; color: #fff;
+      font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; flex: 1;
+    }
+
+    .driver-team {
+      font-size: 0.9rem; color: #aaa;
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+
+    .driver-portrait {
+      position: absolute; right: 0; top: 0;
+      height: 90px; width: 80px;
+      object-fit: cover; object-position: top;
+    }
+
+    /* Video-Hintergrund in der Card */
+    .driver-video {
+      position: absolute; right: 80px; top: 0;
+      height: 90px; width: 160px;
+      object-fit: cover;
+      opacity: 0.4;
+      -webkit-mask-image: linear-gradient(to right, transparent, black);
+      mask-image: linear-gradient(to right, transparent, black);
+    }
+
+    /* ── ABSCHNITT P11-22 / P1-10 ── */
+    .section { display: flex; flex-direction: column; gap: 6px; }
+    .section-label {
+      color: #e10600; font-size: 0.75rem;
+      letter-spacing: 3px; text-transform: uppercase;
+      opacity: 0.7; padding-left: 80px; margin-bottom: 4px;
+    }
+
+    /* ── ANIMIERTE FAHRER-KACHEL (animiertes Video) ── */
+    .driver-animated {
+      animation: driverPulse 3s ease-in-out infinite;
+    }
+    @keyframes driverPulse {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.15); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="race-title"></div>
+<div id="grid-overlay"></div>
+
+<script>
+// ⚠️ DEINE RENDER API URL
+const API_URL = 'https://f1-intro-api.onrender.com';
+const GITHUB_RAW = 'https://github.com/zCrazMaex/F1_Intro/main/assets/drivers';
+
+let gridData = null;
+let currentSection = 'bottom'; // 'bottom' = P22-P11, 'top' = P10-P1
+let revealIndex = 0;
+let revealInterval = null;
+
+// ── Grid laden ──
+async function loadGrid() {
+  try {
+    const res = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
+    gridData = await res.json();
+    document.getElementById('race-title').textContent = gridData.race;
+    document.getElementById('race-title').classList.add('visible');
+  } catch (err) {
+    console.error('Grid konnte nicht geladen werden', err);
+  }
+}
+
+// ── Overlay aufbauen ──
+function buildOverlay() {
+  if (!gridData) return;
+  const overlay = document.getElementById('grid-overlay');
+  overlay.innerHTML = '';
+
+  // Sektion P22-P11
+  const bottomSection = createSection('P22 – P11', gridData.drivers.slice(10, 22).reverse());
+  overlay.appendChild(bottomSection);
+
+  // Trennlinie
+  const divider = document.createElement('div');
+  divider.style.cssText = 'width:1800px; height:2px; background:#e10600; margin:10px 0; opacity:0.4;';
+  overlay.appendChild(divider);
+
+  // Sektion P10-P1
+  const topSection = createSection('TOP 10', gridData.drivers.slice(0, 10).reverse());
+  overlay.appendChild(topSection);
+}
+
+function createSection(label, drivers) {
+  const section = document.createElement('div');
+  section.className = 'section';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'section-label';
+  lbl.textContent = label;
+  section.appendChild(lbl);
+
+  drivers.forEach(driver => {
+    const row = createDriverRow(driver);
+    section.appendChild(row);
+  });
+
+  return section;
+}
+
+function createDriverRow(driver) {
+  const row = document.createElement('div');
+  row.className = 'driver-row';
+  row.id = `driver-p${driver.position}`;
+
+  const assetBase = `${GITHUB_RAW}/${driver.assetKey}`;
+
+  row.innerHTML = `
+    <div class="position-box">P${driver.position}</div>
+    <div class="driver-info driver-animated">
+      <video class="driver-video" autoplay muted loop playsinline>
+        <source src="${assetBase}/video.mp4" type="video/mp4">
+      </video>
+      <span class="driver-number">#${driver.number}</span>
+      <div>
+        <div class="driver-name">${driver.name}</div>
+        <div class="driver-team">${driver.team}</div>
+      </div>
+      <img class="driver-portrait" 
+           src="${assetBase}/portrait.png"
+           onerror="this.src='https://placehold.co/80x90/1a1a2e/e10600?text=${driver.number}'"
+           alt="${driver.name}">
+    </div>
+  `;
+
+  return row;
+}
+
+// ── Reveal-Animation ──
+// Deckt immer 2 Fahrer gleichzeitig auf
+// Erst P22+P21, dann P20+P19 ... bis P12+P11
+// Dann kurze Pause → P10+P9 ... P2+P1
+
+function startReveal() {
+  // Reihenfolge: erst die untere Sektion (P22 down to P11), dann obere
+  const bottomOrder = [];
+  for (let i = 22; i >= 11; i -= 2) {
+    bottomOrder.push([i, i - 1]);
+  }
+  const topOrder = [];
+  for (let i = 10; i >= 1; i -= 2) {
+    topOrder.push([i, i - 1]);
+  }
+
+  let step = 0;
+  const allSteps = [...bottomOrder, 'PAUSE', ...topOrder];
+
+  revealInterval = setInterval(() => {
+    if (step >= allSteps.length) {
+      clearInterval(revealInterval);
+      return;
+    }
+
+    const current = allSteps[step];
+
+    if (current === 'PAUSE') {
+      // Kurze Pause zwischen den Sektionen (2× Interval = 4s)
+      step++;
+      setTimeout(() => {}, 2000);
+    } else {
+      current.forEach(pos => {
+        const el = document.getElementById(`driver-p${pos}`);
+        if (el) {
+          el.classList.add('reveal');
+          // Video starten
+          const video = el.querySelector('video');
+          if (video) video.play();
+        }
+      });
+      step++;
+    }
+  }, 2000); // alle 2 Sekunden 2 neue Fahrer
+}
+
+// ── Auto-Refresh: alle 30s neues Grid laden (für Live-Updates) ──
+setInterval(async () => {
+  await loadGrid();
+  buildOverlay();
+}, 30000);
+
+// ── Start ──
+async function init() {
+  await loadGrid();
+  buildOverlay();
+  setTimeout(startReveal, 1000);
+}
+init();
+</script>
+</body>
+</html>

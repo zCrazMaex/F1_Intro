@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>F1 Grid Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0f; color: #fff; font-family: 'Arial', sans-serif; padding: 20px; }
+    h1 { color: #e10600; margin-bottom: 20px; font-size: 1.5rem; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    input[type="text"] { background: #1a1a2e; border: 1px solid #333; color: #fff; padding: 6px 10px; border-radius: 4px; width: 100%; }
+    .race-input { margin-bottom: 20px; }
+    .race-input label { display: block; margin-bottom: 5px; color: #aaa; font-size: 0.85rem; }
+    .race-input input { max-width: 400px; font-size: 1rem; padding: 8px 12px; }
+    .grid-table { width: 100%; border-collapse: collapse; }
+    .grid-table th { background: #e10600; padding: 8px 12px; text-align: left; font-size: 0.8rem; letter-spacing: 1px; }
+    .grid-table td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; }
+    .grid-table tr:hover td { background: #1a1a2e; }
+    .pos { color: #e10600; font-weight: bold; width: 40px; text-align: center; }
+    .btn { padding: 10px 24px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; }
+    .btn-primary { background: #e10600; color: #fff; }
+    .btn-primary:hover { background: #ff1e00; }
+    .btn-secondary { background: #333; color: #fff; margin-right: 10px; }
+    .status { padding: 10px 15px; border-radius: 4px; margin-top: 15px; display: none; }
+    .status.success { background: #1a3a1a; border: 1px solid #2a6a2a; color: #4caf50; display: block; }
+    .status.error { background: #3a1a1a; border: 1px solid #6a2a2a; color: #f44336; display: block; }
+    .preview-img { width: 30px; height: 40px; object-fit: cover; border-radius: 3px; vertical-align: middle; }
+    .divider { background: #e10600; height: 2px; margin: 8px 0; }
+    .p10-divider td { border-top: 2px solid #e10600 !important; }
+    select { background: #1a1a2e; border: 1px solid #333; color: #fff; padding: 5px 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<h1>🏎️ F1 GRID MANAGER</h1>
+
+<div class="race-input">
+  <label>RENNEN</label>
+  <input type="text" id="raceName" placeholder="z.B. Monaco GP 2026">
+</div>
+
+<div class="header">
+  <div>
+    <button class="btn btn-secondary" onclick="loadGrid()">↺ Laden</button>
+    <button class="btn btn-primary" onclick="saveGrid()">💾 Speichern & Live</button>
+  </div>
+  <span id="lastSaved" style="color:#666; font-size:0.8rem;"></span>
+</div>
+
+<table class="grid-table">
+  <thead>
+    <tr>
+      <th>P</th>
+      <th>NAME</th>
+      <th>TEAM</th>
+      <th>NR</th>
+      <th>ASSET KEY</th>
+      <th>VORSCHAU</th>
+    </tr>
+  </thead>
+  <tbody id="gridBody"></tbody>
+</table>
+
+<div id="statusMsg" class="status"></div>
+
+<script>
+// ⚠️ DEINE RENDER API URL HIER EINTRAGEN
+const API_URL = 'https://f1-intro-api.onrender.com';
+const GITHUB_RAW = 'https://github.com/zCrazMaex/F1_Intro/main/assets/drivers';
+
+// Alle F1 2026 Fahrer als Vorlage
+const DRIVER_TEMPLATES = [
+  { name: 'Max Verstappen', team: 'Red Bull Racing', number: 1, assetKey: 'verstappen' },
+  { name: 'Liam Lawson', team: 'Red Bull Racing', number: 30, assetKey: 'lawson' },
+  { name: 'Lando Norris', team: 'McLaren', number: 4, assetKey: 'norris' },
+  { name: 'Oscar Piastri', team: 'McLaren', number: 81, assetKey: 'piastri' },
+  { name: 'Charles Leclerc', team: 'Ferrari', number: 16, assetKey: 'leclerc' },
+  { name: 'Lewis Hamilton', team: 'Ferrari', number: 44, assetKey: 'hamilton' },
+  { name: 'George Russell', team: 'Mercedes', number: 63, assetKey: 'russell' },
+  { name: 'Andrea Kimi Antonelli', team: 'Mercedes', number: 12, assetKey: 'antonelli' },
+  { name: 'Fernando Alonso', team: 'Aston Martin', number: 14, assetKey: 'alonso' },
+  { name: 'Lance Stroll', team: 'Aston Martin', number: 18, assetKey: 'stroll' },
+  { name: 'Pierre Gasly', team: 'Alpine', number: 10, assetKey: 'gasly' },
+  { name: 'Jack Doohan', team: 'Alpine', number: 7, assetKey: 'doohan' },
+  { name: 'Nico Hülkenberg', team: 'Sauber/Audi', number: 27, assetKey: 'hulkenberg' },
+  { name: 'Gabriel Bortoleto', team: 'Sauber/Audi', number: 5, assetKey: 'bortoleto' },
+  { name: 'Carlos Sainz', team: 'Williams', number: 55, assetKey: 'sainz' },
+  { name: 'Alexander Albon', team: 'Williams', number: 23, assetKey: 'albon' },
+  { name: 'Yuki Tsunoda', team: 'RB', number: 22, assetKey: 'tsunoda' },
+  { name: 'Isack Hadjar', team: 'RB', number: 6, assetKey: 'hadjar' },
+  { name: 'Esteban Ocon', team: 'Haas', number: 31, assetKey: 'ocon' },
+  { name: 'Oliver Bearman', team: 'Haas', number: 87, assetKey: 'bearman' },
+];
+
+let currentGrid = [];
+
+function renderTable(drivers) {
+  const tbody = document.getElementById('gridBody');
+  tbody.innerHTML = '';
+  drivers.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    if (d.position === 11) tr.className = 'p10-divider';
+    const portraitUrl = `${GITHUB_RAW}/${d.assetKey}/portrait.png`;
+    tr.innerHTML = `
+      <td class="pos">${d.position}</td>
+      <td>
+        <select onchange="applyTemplate(${i}, this.value)">
+          <option value="">-- Fahrer wählen --</option>
+          ${DRIVER_TEMPLATES.map(t =>
+            `<option value="${t.assetKey}" ${t.assetKey === d.assetKey ? 'selected' : ''}>${t.name}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td><input type="text" value="${d.team}" oninput="updateDriver(${i}, 'team', this.value)" placeholder="Team"></td>
+      <td><input type="text" value="${d.number}" oninput="updateDriver(${i}, 'number', this.value)" style="width:60px"></td>
+      <td><input type="text" value="${d.assetKey}" oninput="updateDriver(${i}, 'assetKey', this.value)" placeholder="ordnername"></td>
+      <td><img class="preview-img" src="${portraitUrl}" onerror="this.src='https://placehold.co/30x40/1a1a2e/e10600?text=?'" alt=""></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function applyTemplate(index, assetKey) {
+  const template = DRIVER_TEMPLATES.find(t => t.assetKey === assetKey);
+  if (!template) return;
+  currentGrid[index] = { ...currentGrid[index], ...template };
+  renderTable(currentGrid);
+}
+
+function updateDriver(index, field, value) {
+  currentGrid[index][field] = value;
+}
+
+async function loadGrid() {
+  try {
+    const res = await fetch(`${API_URL}/api/grid`);
+    const data = await res.json();
+    document.getElementById('raceName').value = data.race || '';
+    currentGrid = data.drivers;
+    renderTable(currentGrid);
+    document.getElementById('lastSaved').textContent = `Zuletzt gespeichert: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
+  } catch (err) {
+    showStatus('Fehler beim Laden: ' + err.message, 'error');
+  }
+}
+
+async function saveGrid() {
+  const payload = {
+    race: document.getElementById('raceName').value,
+    drivers: currentGrid
+  };
+  try {
+    const res = await fetch(`${API_URL}/api/grid`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    showStatus('✅ Gespeichert! OBS-Overlay wird automatisch aktualisiert.', 'success');
+    document.getElementById('lastSaved').textContent = `Zuletzt gespeichert: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
+  } catch (err) {
+    showStatus('Fehler beim Speichern: ' + err.message, 'error');
+  }
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = `status ${type}`;
+  setTimeout(() => el.className = 'status', 4000);
+}
+
+// Beim Start laden
+loadGrid();
+
+// Standard-Grid initialisieren falls leer
+if (currentGrid.length === 0) {
+  currentGrid = Array.from({length: 22}, (_, i) => ({
+    position: i + 1,
+    name: DRIVER_TEMPLATES[i]?.name || `Fahrer ${i+1}`,
+    team: DRIVER_TEMPLATES[i]?.team || 'Team',
+    number: DRIVER_TEMPLATES[i]?.number || i+1,
+    assetKey: DRIVER_TEMPLATES[i]?.assetKey || 'placeholder'
+  }));
+}
+</script>
+</body>
+</html>
