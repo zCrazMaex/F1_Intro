@@ -43,5 +43,25 @@ app.post('/api/grid', async (req, res) => {
   }
 });
 
+// Replay triggern
+app.post('/api/replay', async (req, res) => {
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, { headers: HEADERS });
+    const data = await r.json();
+    const updated = { ...data, replayAt: new Date().toISOString() };
+    await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+      method: 'PUT',
+      headers: HEADERS,
+      body: JSON.stringify(updated)
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`F1 API running on port ${PORT}`));
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`F1 API running on port ${PORT}`));
