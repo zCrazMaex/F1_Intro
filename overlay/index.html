@@ -2,226 +2,453 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>F1 Grid Overlay</title>
+  <title>F1 Starting Grid Overlay</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;600&display=swap');
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      width: 1920px; height: 1080px;
+      width: 1920px;
+      height: 1080px;
       background: transparent;
       overflow: hidden;
-      font-family: 'Formula1', 'Arial Black', sans-serif;
+      font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
     }
 
-    /* ── GRID CONTAINER ── */
-    #grid-overlay {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      justify-content: center; align-items: center;
-      gap: 0;
+    /* ── HINTERGRUND ── */
+    #bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(0,0,0,0.97) 0%, rgba(10,10,18,0.95) 60%, rgba(20,0,0,0.93) 100%);
     }
 
-    /* ── RENNNAME OBEN ── */
-    #race-title {
-      position: absolute; top: 40px; left: 0; right: 0;
-      text-align: center;
-      color: #fff; font-size: 2rem; letter-spacing: 4px;
-      text-transform: uppercase;
-      opacity: 0; transform: translateY(-20px);
-      transition: all 0.6s ease;
+    /* Diagonale rote Akzentlinie */
+    #bg::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        linear-gradient(105deg, transparent 48%, rgba(225,6,0,0.06) 48.5%, rgba(225,6,0,0.06) 51%, transparent 51.5%);
     }
-    #race-title.visible { opacity: 1; transform: translateY(0); }
 
-    /* ── DRIVER CARD ── */
-    .driver-row {
-      display: flex; width: 1800px;
-      height: 90px; margin: 3px 0;
-      opacity: 0; transform: translateX(-60px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
+    /* Subtile Raster-Textur */
+    #bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 39px, rgba(255,255,255,0.015) 40px);
     }
-    .driver-row.reveal { opacity: 1; transform: translateX(0); }
 
-    .position-box {
-      width: 80px; height: 90px;
+    /* ── HEADER BEREICH ── */
+    #header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      padding: 0 60px;
+      z-index: 10;
+      border-bottom: 1px solid rgba(225,6,0,0.3);
+      background: linear-gradient(180deg, rgba(225,6,0,0.12) 0%, transparent 100%);
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    #header.visible { opacity: 1; transform: translateY(0); }
+
+    #f1-logo-bar {
+      width: 5px;
+      height: 60px;
       background: #e10600;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.2rem; font-weight: 900; color: #fff;
-      clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);
+      margin-right: 24px;
       flex-shrink: 0;
     }
 
+    #header-text { flex: 1; }
+
+    #header-label {
+      font-size: 13px;
+      letter-spacing: 6px;
+      color: #e10600;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    #race-name {
+      font-size: 42px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    #header-right {
+      text-align: right;
+    }
+
+    #session-label {
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    #starting-grid-label {
+      font-size: 32px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    /* ── GRID CONTAINER (2 Spalten wie echte Startaufstellung) ── */
+    #grid-container {
+      position: absolute;
+      top: 120px;
+      left: 0; right: 0;
+      bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      padding: 0 40px;
+      z-index: 5;
+    }
+
+    /* Linke Spalte: Ungerade Plätze (P1, P3, P5...) */
+    #col-left { display: flex; flex-direction: column; gap: 4px; padding-right: 20px; }
+    /* Rechte Spalte: Gerade Plätze (P2, P4, P6...) */
+    #col-right { display: flex; flex-direction: column; gap: 4px; padding-left: 20px; border-left: 1px solid rgba(225,6,0,0.15); }
+
+    /* ── DRIVER CARD ── */
+    .driver-card {
+      height: 78px;
+      display: flex;
+      align-items: stretch;
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #col-right .driver-card {
+      transform: translateX(40px);
+    }
+
+    .driver-card.reveal {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Position Box */
+    .pos-box {
+      width: 58px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #e10600;
+      flex-shrink: 0;
+      clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+      padding-right: 6px;
+    }
+
+    .pos-p {
+      font-size: 10px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    .pos-num {
+      font-size: 30px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+    }
+
+    /* Team-Farbstreifen */
+    .team-stripe {
+      width: 4px;
+      flex-shrink: 0;
+    }
+
+    /* Info-Bereich */
     .driver-info {
-      flex: 1; height: 90px;
-      background: rgba(10, 10, 20, 0.92);
-      border-left: 3px solid #e10600;
-      display: flex; align-items: center;
-      padding: 0 20px; gap: 20px;
-      position: relative; overflow: hidden;
+      flex: 1;
+      background: rgba(8, 8, 16, 0.92);
+      display: flex;
+      align-items: center;
+      padding: 0 12px 0 14px;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* Video-Hintergrund */
+    .driver-video {
+      position: absolute;
+      right: 100px;
+      top: 0;
+      height: 100%;
+      width: 200px;
+      object-fit: cover;
+      opacity: 0.15;
+      mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 40%, black 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.5) 40%, black 100%);
+    }
+
+    .driver-number-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 44px;
     }
 
     .driver-number {
-      font-size: 1.4rem; color: #e10600;
-      font-weight: 900; width: 50px;
+      font-size: 28px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
     }
 
-    .driver-name {
-      font-size: 1.6rem; color: #fff;
-      font-weight: 700; letter-spacing: 1px;
-      text-transform: uppercase; flex: 1;
+    .driver-name-block { flex: 1; }
+
+    .driver-firstname {
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .driver-lastname {
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.1;
     }
 
     .driver-team {
-      font-size: 0.9rem; color: #aaa;
-      text-transform: uppercase; letter-spacing: 2px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 2px;
+    }
+
+    /* Portrait */
+    .driver-portrait-wrap {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 90px;
+      overflow: hidden;
+      flex-shrink: 0;
     }
 
     .driver-portrait {
-      position: absolute; right: 0; top: 0;
-      height: 90px; width: 80px;
-      object-fit: cover; object-position: top;
-    }
-
-    /* Video-Hintergrund in der Card */
-    .driver-video {
-      position: absolute; right: 80px; top: 0;
-      height: 90px; width: 160px;
+      height: 110%;
+      width: 100%;
       object-fit: cover;
-      opacity: 0.4;
-      -webkit-mask-image: linear-gradient(to right, transparent, black);
-      mask-image: linear-gradient(to right, transparent, black);
+      object-position: top center;
+      transform: translateY(-5%);
+      mask-image: linear-gradient(to right, transparent 0%, black 30%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 30%);
     }
 
-    /* ── ABSCHNITT P11-22 / P1-10 ── */
-    .section { display: flex; flex-direction: column; gap: 6px; }
-    .section-label {
-      color: #e10600; font-size: 0.75rem;
-      letter-spacing: 3px; text-transform: uppercase;
-      opacity: 0.7; padding-left: 80px; margin-bottom: 4px;
+    /* ── SECTION BREAK (P11 Trennlinie) ── */
+    .section-break {
+      height: 12px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .section-break.reveal { opacity: 1; }
+
+    /* ── PULSE ANIMATION auf Cards ── */
+    .driver-card.reveal .driver-info {
+      animation: subtlePulse 4s ease-in-out infinite;
+      animation-delay: calc(var(--delay, 0) * 0.1s);
     }
 
-    /* ── ANIMIERTE FAHRER-KACHEL (animiertes Video) ── */
-    .driver-animated {
-      animation: driverPulse 3s ease-in-out infinite;
+    @keyframes subtlePulse {
+      0%, 100% { background: rgba(8, 8, 16, 0.92); }
+      50% { background: rgba(12, 12, 24, 0.95); }
     }
-    @keyframes driverPulse {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.15); }
+
+    /* Team-Farben */
+    .team-redbull    { background: #3671C6; }
+    .team-mclaren    { background: #FF8000; }
+    .team-ferrari    { background: #E8002D; }
+    .team-mercedes   { background: #27F4D2; }
+    .team-astonmartin{ background: #229971; }
+    .team-alpine     { background: #FF87BC; }
+    .team-sauber     { background: #C92D4B; }
+    .team-williams   { background: #64C4FF; }
+    .team-rb         { background: #6692FF; }
+    .team-haas       { background: #B6BABD; }
+
+    /* ── SCAN LINE EFFECT ── */
+    #scanline {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
     }
   </style>
 </head>
 <body>
 
-<div id="race-title"></div>
-<div id="grid-overlay"></div>
+<div id="bg"></div>
+<div id="scanline"></div>
+
+<div id="header">
+  <div id="f1-logo-bar"></div>
+  <div id="header-text">
+    <div id="header-label">Formula 1</div>
+    <div id="race-name">—</div>
+  </div>
+  <div id="header-right">
+    <div id="session-label">2026 Season</div>
+    <div id="starting-grid-label">Starting Grid</div>
+  </div>
+</div>
+
+<div id="grid-container">
+  <div id="col-left"></div>
+  <div id="col-right"></div>
+</div>
 
 <script>
-// ⚠️ DEINE RENDER API URL
 const API_URL = 'https://f1-intro-api.onrender.com';
-const GITHUB_RAW = 'https://github.com/zCrazMaex/F1_Intro/main/assets/drivers';
+const GITHUB_RAW = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
+
+const TEAM_CLASSES = {
+  'Red Bull Racing': 'team-redbull',
+  'McLaren':         'team-mclaren',
+  'Ferrari':         'team-ferrari',
+  'Mercedes':        'team-mercedes',
+  'Aston Martin':    'team-astonmartin',
+  'Alpine':          'team-alpine',
+  'Sauber/Audi':     'team-sauber',
+  'Williams':        'team-williams',
+  'RB':              'team-rb',
+  'Haas':            'team-haas',
+};
 
 let gridData = null;
 let lastReplayAt = null;
 let revealInterval = null;
 
-async function checkForUpdates() {
-  try {
-    const res = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
-    const newData = await res.json();
-
-    // Neu starten wenn replayAt sich geändert hat
-    if (newData.replayAt && newData.replayAt !== lastReplayAt) {
-      console.log('Replay erkannt, starte Animation...');
-      lastReplayAt = newData.replayAt;
-      gridData = newData;
-      restartOverlay();
-    }
-  } catch (err) {
-    console.error('Fehler beim Laden:', err);
-  }
+/* ── Hilfsfunktionen ── */
+function getTeamClass(team) {
+  return TEAM_CLASSES[team] || 'team-rb';
 }
 
-function restartOverlay() {
-  if (revealInterval) {
-    clearInterval(revealInterval);
-    revealInterval = null;
-  }
-
-  // Alle Karten verstecken
-  document.querySelectorAll('.driver-row').forEach(el => el.classList.remove('reveal'));
-
-  // Titel
-  const title = document.getElementById('race-title');
-  if (title) {
-    title.textContent = gridData.race;
-    title.classList.add('visible');
-  }
-
-  buildOverlay();
-  setTimeout(startReveal, 1000);
+function splitName(fullName) {
+  const parts = fullName.trim().split(' ');
+  if (parts.length === 1) return { first: '', last: parts[0] };
+  const last = parts.pop();
+  return { first: parts.join(' '), last };
 }
 
-function buildOverlay() {
-  const overlay = document.getElementById('grid-overlay');
-  overlay.innerHTML = '';
+/* ── Card erstellen ── */
+function createCard(driver) {
+  const card = document.createElement('div');
+  card.className = 'driver-card';
+  card.id = `driver-p${driver.position}`;
 
-  const bottomSection = createSection('P22 – P11', gridData.drivers.slice(10, 22).reverse());
-  overlay.appendChild(bottomSection);
-
-  const divider = document.createElement('div');
-  divider.style.cssText = 'width:1800px; height:2px; background:#e10600; margin:10px 0; opacity:0.4;';
-  overlay.appendChild(divider);
-
-  const topSection = createSection('TOP 10', gridData.drivers.slice(0, 10).reverse());
-  overlay.appendChild(topSection);
-}
-
-function createSection(label, drivers) {
-  const section = document.createElement('div');
-  section.className = 'section';
-
-  const lbl = document.createElement('div');
-  lbl.className = 'section-label';
-  lbl.textContent = label;
-  section.appendChild(lbl);
-
-  drivers.forEach(driver => section.appendChild(createDriverRow(driver)));
-  return section;
-}
-
-function createDriverRow(driver) {
-  const row = document.createElement('div');
-  row.className = 'driver-row';
-  row.id = `driver-p${driver.position}`;
-
+  const { first, last } = splitName(driver.name);
+  const teamClass = getTeamClass(driver.team);
   const assetBase = `${GITHUB_RAW}/${driver.assetKey}`;
 
-  row.innerHTML = `
-    <div class="position-box">P${driver.position}</div>
-    <div class="driver-info driver-animated">
+  card.innerHTML = `
+    <div class="pos-box">
+      <span class="pos-p">P</span>
+      <span class="pos-num">${driver.position}</span>
+    </div>
+    <div class="team-stripe ${teamClass}"></div>
+    <div class="driver-info">
       <video class="driver-video" autoplay muted loop playsinline>
         <source src="${assetBase}/video.mp4" type="video/mp4">
       </video>
-      <span class="driver-number">#${driver.number}</span>
-      <div>
-        <div class="driver-name">${driver.name}</div>
+      <div class="driver-number-box">
+        <span class="driver-number">${driver.number}</span>
+      </div>
+      <div class="driver-name-block">
+        <div class="driver-firstname">${first}</div>
+        <div class="driver-lastname">${last}</div>
         <div class="driver-team">${driver.team}</div>
       </div>
-      <img class="driver-portrait"
-           src="${assetBase}/portrait.png"
-           onerror="this.src='https://placehold.co/80x90/1a1a2e/e10600?text=${driver.number}'"
-           alt="${driver.name}">
+      <div class="driver-portrait-wrap">
+        <img class="driver-portrait"
+          src="${assetBase}/portrait.png"
+          onerror="this.style.display='none'"
+          alt="${driver.name}">
+      </div>
     </div>
   `;
-  return row;
+  return card;
 }
 
+/* ── Overlay aufbauen ── */
+function buildOverlay() {
+  const colLeft  = document.getElementById('col-left');
+  const colRight = document.getElementById('col-right');
+  colLeft.innerHTML  = '';
+  colRight.innerHTML = '';
+
+  document.getElementById('race-name').textContent = gridData.race;
+
+  // Echte F1-Startaufstellung: links ungerade (P1,P3,P5...), rechts gerade (P2,P4,P6...)
+  const sorted = [...gridData.drivers].sort((a, b) => a.position - b.position);
+
+  sorted.forEach(driver => {
+    const card = createCard(driver);
+    if (driver.position % 2 === 1) {
+      colLeft.appendChild(card);
+    } else {
+      colRight.appendChild(card);
+    }
+  });
+}
+
+/* ── Reveal Animation ── */
+// Deckt Paar-weise auf: P22+P21, P20+P19 ... bis alle gezeigt
 function startReveal() {
-  const bottomOrder = [];
-  for (let i = 22; i >= 11; i -= 2) bottomOrder.push([i, i - 1]);
+  document.getElementById('header').classList.add('visible');
 
-  const topOrder = [];
-  for (let i = 10; i >= 1; i -= 2) topOrder.push([i, i - 1]);
+  // Aufdeckreihenfolge: von hinten nach vorne
+  // Erst P22-P11 (hinten), dann kurze Pause, dann P10-P1 (vorne)
+  const backRows  = []; // [22,21], [20,19] ... [12,11]
+  const frontRows = []; // [10,9], [8,7] ... [2,1]
 
-  const allSteps = [...bottomOrder, null, ...topOrder];
+  for (let i = 22; i >= 11; i -= 2) backRows.push([i, i-1]);
+  for (let i = 10; i >= 1;  i -= 2) frontRows.push([i, i-1]);
+
+  const allSteps = [...backRows, null, ...frontRows]; // null = Pause
   let step = 0;
 
   revealInterval = setInterval(() => {
@@ -233,29 +460,54 @@ function startReveal() {
 
     const current = allSteps[step];
     step++;
-    if (current === null) return;
+    if (current === null) return; // 1 Tick Pause zwischen Sektionen
 
     current.forEach(pos => {
       const el = document.getElementById(`driver-p${pos}`);
-      if (el) {
-        el.classList.add('reveal');
-        const video = el.querySelector('video');
-        if (video) video.play();
-      }
+      if (!el) return;
+      el.classList.add('reveal');
+      const vid = el.querySelector('video');
+      if (vid) vid.play().catch(() => {});
     });
-  }, 2000);
+  }, 1800);
 }
 
-// Beim ersten Laden direkt starten
+/* ── Restart ── */
+function restartOverlay() {
+  if (revealInterval) { clearInterval(revealInterval); revealInterval = null; }
+
+  document.getElementById('header').classList.remove('visible');
+  document.querySelectorAll('.driver-card').forEach(el => el.classList.remove('reveal'));
+
+  buildOverlay();
+  setTimeout(startReveal, 600);
+}
+
+/* ── Polling: auf neue replayAt prüfen ── */
+async function checkForUpdates() {
+  try {
+    const res = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
+    const data = await res.json();
+    if (data.replayAt && data.replayAt !== lastReplayAt) {
+      lastReplayAt = data.replayAt;
+      gridData = data;
+      restartOverlay();
+    }
+  } catch (err) {
+    console.error('Polling-Fehler:', err);
+  }
+}
+
+/* ── Init ── */
 async function init() {
   try {
     const res = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
     gridData = await res.json();
     lastReplayAt = gridData.replayAt || null;
     buildOverlay();
-    setTimeout(startReveal, 1000);
+    setTimeout(startReveal, 800);
   } catch (err) {
-    console.error('Init fehlgeschlagen:', err);
+    console.error('Init-Fehler:', err);
   }
 }
 
