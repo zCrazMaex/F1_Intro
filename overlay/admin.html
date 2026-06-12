@@ -159,32 +159,29 @@ async function saveGrid() {
     drivers: currentGrid
   };
   try {
-    // Erst speichern
+    // Schritt 1: Grid speichern
     const res = await fetch(`${API_URL}/api/grid`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
+    console.log('Grid gespeichert:', data);
 
-    // Dann Replay triggern
-    await fetch(`${API_URL}/api/replay`, { method: 'POST' });
+    // Schritt 2: Replay triggern
+    const replayRes = await fetch(`${API_URL}/api/replay`, { method: 'POST' });
+    const replayData = await replayRes.json();
+    console.log('Replay getriggert:', replayData);
 
     showStatus('✅ Gespeichert! Animation startet in OBS...', 'success');
     document.getElementById('lastSaved').textContent =
       `Zuletzt gespeichert: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
   } catch (err) {
-    showStatus('Fehler beim Speichern: ' + err.message, 'error');
+    console.error('Fehler:', err);
+    showStatus('Fehler: ' + err.message, 'error');
   }
 }
-
-function showStatus(msg, type) {
-  const el = document.getElementById('statusMsg');
-  el.textContent = msg;
-  el.className = `status ${type}`;
-  setTimeout(() => el.className = 'status', 4000);
-}
-
+  
 loadGrid();
   
 </script>
