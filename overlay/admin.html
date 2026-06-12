@@ -159,13 +159,18 @@ async function saveGrid() {
     drivers: currentGrid
   };
   try {
+    // Erst speichern
     const res = await fetch(`${API_URL}/api/grid`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    showStatus('✅ Gespeichert! OBS-Overlay wird automatisch aktualisiert.', 'success');
+
+    // Dann Replay triggern
+    await fetch(`${API_URL}/api/replay`, { method: 'POST' });
+
+    showStatus('✅ Gespeichert! Animation startet in OBS...', 'success');
     document.getElementById('lastSaved').textContent =
       `Zuletzt gespeichert: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
   } catch (err) {
