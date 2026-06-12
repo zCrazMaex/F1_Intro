@@ -1,52 +1,46 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const GRID_FILE = path.join(__dirname, 'grid.json');
+const JSONBIN_ID = 'DEINE_BIN_ID';       // z.B. 6849abc...
+const JSONBIN_KEY = 'DEIN_API_KEY';       // $2a$10$...
 
-// Standard-Grid beim Start
-const defaultGrid = {
-  race: "Monaco GP 2026",
-  updatedAt: new Date().toISOString(),
-  drivers: Array.from({length: 22}, (_, i) => ({
-    position: i + 1,
-    name: `Driver ${i + 1}`,
-    team: "Team",
-    number: i + 1,
-    assetKey: "placeholder"
-  }))
+const HEADERS = {
+  'Content-Type': 'application/json',
+  'X-Master-Key': JSONBIN_KEY,
+  'X-Bin-Meta': 'false'
 };
 
 // Grid laden
-app.get('/api/grid', (req, res) => {
+app.get('/api/grid', async (req, res) => {
   try {
-    const data = fs.readFileSync(GRID_FILE, 'utf8');
-    res.json(JSON.parse(data));
-  } catch {
-    res.json(defaultGrid);
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
+      headers: HEADERS
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
 // Grid speichern
-app.post('/api/grid', (req, res) => {
-  const grid = { ...req.body, updatedAt: new Date().toISOString() };
-  fs.writeFileSync(GRID_FILE, JSON.stringify(grid, null, 2));
-  res.json({ success: true, updatedAt: grid.updatedAt });
-});
-
-// Assets-Liste (welche Fahrer haben Videos/Bilder auf GitHub)
-app.get('/api/assets', (req, res) => {
-  // Du pflegst diese Liste manuell oder via GitHub API
-  const GITHUB_RAW = 'https://raw.githubusercontent.com/DEIN_USER/f1-intro-overlay/main/assets/drivers';
-  res.json({
-    baseUrl: GITHUB_RAW,
-    drivers: req.query.keys ? req.query.keys.split(',') : ['placeholder']
-  });
+app.post('/api/grid', async (req, res) => {
+  try {
+    const grid = { ...req.body, updatedAt: new Date().toISOString() };
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+      method: 'PUT',
+      headers: HEADERS,
+      body: JSON.stringify(grid)
+    });
+    const data = await response.json();
+    res.json({ success: true, updatedAt: grid.updatedAt });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
