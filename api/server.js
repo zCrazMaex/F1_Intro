@@ -5,8 +5,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const JSONBIN_ID = 'DEINE_BIN_ID';       // z.B. 6849abc...
-const JSONBIN_KEY = 'DEIN_API_KEY';       // $2a$10$...
+const JSONBIN_ID = process.env.JSONBIN_ID;
+const JSONBIN_KEY = process.env.JSONBIN_KEY;
 
 const HEADERS = {
   'Content-Type': 'application/json',
