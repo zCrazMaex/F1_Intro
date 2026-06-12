@@ -119,38 +119,57 @@ const API_URL = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW = 'https://github.com/zCrazMaex/F1_Intro/main/assets/drivers';
 
 let gridData = null;
-let currentSection = 'bottom'; // 'bottom' = P22-P11, 'top' = P10-P1
-let revealIndex = 0;
+let lastReplayAt = null;
 let revealInterval = null;
 
-// ── Grid laden ──
-async function loadGrid() {
+async function checkForUpdates() {
   try {
     const res = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
-    gridData = await res.json();
-    document.getElementById('race-title').textContent = gridData.race;
-    document.getElementById('race-title').classList.add('visible');
+    const newData = await res.json();
+
+    // Neu starten wenn replayAt sich geändert hat
+    if (newData.replayAt && newData.replayAt !== lastReplayAt) {
+      console.log('Replay erkannt, starte Animation...');
+      lastReplayAt = newData.replayAt;
+      gridData = newData;
+      restartOverlay();
+    }
   } catch (err) {
-    console.error('Grid konnte nicht geladen werden', err);
+    console.error('Fehler beim Laden:', err);
   }
 }
 
-// ── Overlay aufbauen ──
+function restartOverlay() {
+  if (revealInterval) {
+    clearInterval(revealInterval);
+    revealInterval = null;
+  }
+
+  // Alle Karten verstecken
+  document.querySelectorAll('.driver-row').forEach(el => el.classList.remove('reveal'));
+
+  // Titel
+  const title = document.getElementById('race-title');
+  if (title) {
+    title.textContent = gridData.race;
+    title.classList.add('visible');
+  }
+
+  buildOverlay();
+  setTimeout(startReveal, 1000);
+}
+
 function buildOverlay() {
-  if (!gridData) return;
   const overlay = document.getElementById('grid-overlay');
   overlay.innerHTML = '';
 
-  // Sektion P22-P11
   const bottomSection = createSection('P22 – P11', gridData.drivers.slice(10, 22).reverse());
   overlay.appendChild(bottomSection);
 
-  // Trennlinie
   const divider = document.createElement('div');
   divider.style.cssText = 'width:1800px; height:2px; background:#e10600; margin:10px 0; opacity:0.4;';
   overlay.appendChild(divider);
 
-  // Sektion P10-P1
   const topSection = createSection('TOP 10', gridData.drivers.slice(0, 10).reverse());
   overlay.appendChild(topSection);
 }
@@ -164,11 +183,7 @@ function createSection(label, drivers) {
   lbl.textContent = label;
   section.appendChild(lbl);
 
-  drivers.forEach(driver => {
-    const row = createDriverRow(driver);
-    section.appendChild(row);
-  });
-
+  drivers.forEach(driver => section.appendChild(createDriverRow(driver)));
   return section;
 }
 
@@ -190,75 +205,62 @@ function createDriverRow(driver) {
         <div class="driver-name">${driver.name}</div>
         <div class="driver-team">${driver.team}</div>
       </div>
-      <img class="driver-portrait" 
+      <img class="driver-portrait"
            src="${assetBase}/portrait.png"
            onerror="this.src='https://placehold.co/80x90/1a1a2e/e10600?text=${driver.number}'"
            alt="${driver.name}">
     </div>
   `;
-
   return row;
 }
 
-// ── Reveal-Animation ──
-// Deckt immer 2 Fahrer gleichzeitig auf
-// Erst P22+P21, dann P20+P19 ... bis P12+P11
-// Dann kurze Pause → P10+P9 ... P2+P1
-
 function startReveal() {
-  // Reihenfolge: erst die untere Sektion (P22 down to P11), dann obere
   const bottomOrder = [];
-  for (let i = 22; i >= 11; i -= 2) {
-    bottomOrder.push([i, i - 1]);
-  }
-  const topOrder = [];
-  for (let i = 10; i >= 1; i -= 2) {
-    topOrder.push([i, i - 1]);
-  }
+  for (let i = 22; i >= 11; i -= 2) bottomOrder.push([i, i - 1]);
 
+  const topOrder = [];
+  for (let i = 10; i >= 1; i -= 2) topOrder.push([i, i - 1]);
+
+  const allSteps = [...bottomOrder, null, ...topOrder];
   let step = 0;
-  const allSteps = [...bottomOrder, 'PAUSE', ...topOrder];
 
   revealInterval = setInterval(() => {
     if (step >= allSteps.length) {
       clearInterval(revealInterval);
+      revealInterval = null;
       return;
     }
 
     const current = allSteps[step];
+    step++;
+    if (current === null) return;
 
-    if (current === 'PAUSE') {
-      // Kurze Pause zwischen den Sektionen (2× Interval = 4s)
-      step++;
-      setTimeout(() => {}, 2000);
-    } else {
-      current.forEach(pos => {
-        const el = document.getElementById(`driver-p${pos}`);
-        if (el) {
-          el.classList.add('reveal');
-          // Video starten
-          const video = el.querySelector('video');
-          if (video) video.play();
-        }
-      });
-      step++;
-    }
-  }, 2000); // alle 2 Sekunden 2 neue Fahrer
+    current.forEach(pos => {
+      const el = document.getElementById(`driver-p${pos}`);
+      if (el) {
+        el.classList.add('reveal');
+        const video = el.querySelector('video');
+        if (video) video.play();
+      }
+    });
+  }, 2000);
 }
 
-// ── Auto-Refresh: alle 30s neues Grid laden (für Live-Updates) ──
-setInterval(async () => {
-  await loadGrid();
-  buildOverlay();
-}, 30000);
-
-// ── Start ──
+// Beim ersten Laden direkt starten
 async function init() {
-  await loadGrid();
-  buildOverlay();
-  setTimeout(startReveal, 1000);
+  try {
+    const res = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
+    gridData = await res.json();
+    lastReplayAt = gridData.replayAt || null;
+    buildOverlay();
+    setTimeout(startReveal, 1000);
+  } catch (err) {
+    console.error('Init fehlgeschlagen:', err);
+  }
 }
+
 init();
+setInterval(checkForUpdates, 5000);
 </script>
 </body>
 </html>
