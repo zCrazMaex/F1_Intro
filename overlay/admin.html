@@ -181,6 +181,13 @@ async function saveGrid() {
     showStatus('Fehler: ' + err.message, 'error');
   }
 }
+
+function showStatus(msg, type) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = `status ${type}`;
+  setTimeout(() => el.className = 'status', 4000);
+}
   
 loadGrid();
   
