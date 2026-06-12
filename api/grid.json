@@ -1,0 +1,8 @@
+{
+  "race": "Monaco GP 2026",
+  "updatedAt": "2026-01-01T00:00:00Z",
+  "drivers": [
+    { "position": 1, "name": "Max Verstappen", "team": "Red Bull", "number": 1, "assetKey": "verstappen" },
+    { "position": 2, "name": "Lando Norris", "team": "McLaren", "number": 4, "assetKey": "norris" }
+  ]
+}
