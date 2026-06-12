@@ -170,19 +170,9 @@ function showStatus(msg, type) {
   setTimeout(() => el.className = 'status', 4000);
 }
 
-// Beim Start laden
+// Beim Start laden (Standard-Grid wird in loadGrid() gesetzt falls API leer)
 loadGrid();
-
-// Standard-Grid initialisieren falls leer
-if (currentGrid.length === 0) {
-  currentGrid = Array.from({length: 22}, (_, i) => ({
-    position: i + 1,
-    name: DRIVER_TEMPLATES[i]?.name || `Fahrer ${i+1}`,
-    team: DRIVER_TEMPLATES[i]?.team || 'Team',
-    number: DRIVER_TEMPLATES[i]?.number || i+1,
-    assetKey: DRIVER_TEMPLATES[i]?.assetKey || 'placeholder'
-  }));
-}
+  
 </script>
 </body>
 </html>
