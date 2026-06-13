@@ -422,7 +422,6 @@ function splitName(full) {
   return { first: parts.join(' '), last };
 }
 function teamColor(team) { return TEAM_COLORS[team] || '#e10600'; }
-function driverCode(key) { return (DRIVER_CODES[key] || key.slice(0,3)).toUpperCase(); }
 
 function buildSlots(drivers) {
   const slotL = document.getElementById('slots-left');
@@ -434,12 +433,15 @@ function buildSlots(drivers) {
     const slot = document.createElement('div');
     slot.className = 'slot';
     slot.id = `slot-p${d.position}`;
-    const color   = teamColor(d.team);
-    const code    = driverCode(d.assetKey);
-    const logoSrc = TEAM_LOGOS[d.team] || '';
+
+    const isEmpty = !d.assetKey || d.assetKey === '';
+    const color   = isEmpty ? 'transparent' : teamColor(d.team);
+    const code    = isEmpty ? '' : driverCode(d.assetKey);
+    const logoSrc = isEmpty ? '' : (TEAM_LOGOS[d.team] || '');
+
     slot.innerHTML = `
-      <div class="slot-pos">${d.position}</div>
-      <img class="slot-team-logo" src="${logoSrc}" onerror="this.style.display='none'" alt="">
+      <div class="slot-pos" style="color:${isEmpty ? 'rgba(255,255,255,0.2)' : ''}">${d.position}</div>
+      <img class="slot-team-logo" src="${logoSrc}" onerror="this.style.display='none'" style="${isEmpty ? 'display:none' : ''}" alt="">
       <div class="slot-name" style="color:${color}">${code}</div>
     `;
     (d.position % 2 === 1 ? slotL : slotR).appendChild(slot);
