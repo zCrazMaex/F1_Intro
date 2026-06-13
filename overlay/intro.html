@@ -348,13 +348,12 @@ async function init() {
   try {
     const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
     const data = await res.json();
-    lastReplayAt = data.replayAt || null;
     startIntro(data.drivers);
   } catch(e) { console.error('Init:', e); }
 }
 
 init();
-setInterval(checkForUpdates, 5000);
+// kein setInterval mehr nötig
 </script>
 </body>
 </html>
