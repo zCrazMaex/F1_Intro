@@ -485,40 +485,44 @@ function startReveal(drivers) {
   for (let i = 22; i >= 11; i -= 2) backPairs.push([i, i-1]);
   for (let i = 10; i >= 1;  i -= 2) frontPairs.push([i, i-1]);
 
-  // Erstes Paar (P22+P21) sofort zeigen
-  const [f0, f1] = backPairs[0];
-  [f0, f1].forEach(pos => {
-    const el = document.getElementById(`slot-p${pos}`);
-    if (el) el.classList.add('reveal');
-  });
-  const odd0  = f0 % 2 === 1 ? f0 : f1;
-  const even0 = f0 % 2 === 0 ? f0 : f1;
-  showPanelDrivers(odd0, even0, drivers);
-  currentFeaturedPositions = [odd0, even0];
-
-  // Alle weiteren Paare nach 2s Intervall
-  const steps = [...backPairs.slice(1), null, ...frontPairs];
-  let step = 0;
-
-  revealInterval = setInterval(() => {
-    if (step >= steps.length) {
-      clearInterval(revealInterval);
-      revealInterval = null;
-      return;
-    }
-    const pair = steps[step++];
-    if (pair === null) return;
-
-    const [a, b] = pair;
-    [a, b].forEach(pos => {
+  // Erstes Paar (P22+P21) nach kurzer Verzögerung zeigen
+  setTimeout(() => {
+    const [f0, f1] = backPairs[0];
+    [f0, f1].forEach(pos => {
       const el = document.getElementById(`slot-p${pos}`);
       if (el) el.classList.add('reveal');
     });
-    const odd  = a % 2 === 1 ? a : b;
-    const even = a % 2 === 0 ? a : b;
-    currentFeaturedPositions = [odd, even];
-    showPanelDrivers(odd, even, drivers);
-  }, 2000);
+    const odd0  = f0 % 2 === 1 ? f0 : f1;
+    const even0 = f0 % 2 === 0 ? f0 : f1;
+    showPanelDrivers(odd0, even0, drivers);
+    currentFeaturedPositions = [odd0, even0];
+  }, 500);
+
+  // Alle weiteren Paare erst nach 2500ms starten (500ms + 2000ms Intervall)
+  const steps = [...backPairs.slice(1), null, ...frontPairs];
+  let step = 0;
+
+  setTimeout(() => {
+    revealInterval = setInterval(() => {
+      if (step >= steps.length) {
+        clearInterval(revealInterval);
+        revealInterval = null;
+        return;
+      }
+      const pair = steps[step++];
+      if (pair === null) return;
+
+      const [a, b] = pair;
+      [a, b].forEach(pos => {
+        const el = document.getElementById(`slot-p${pos}`);
+        if (el) el.classList.add('reveal');
+      });
+      const odd  = a % 2 === 1 ? a : b;
+      const even = a % 2 === 0 ? a : b;
+      currentFeaturedPositions = [odd, even];
+      showPanelDrivers(odd, even, drivers);
+    }, 2000);
+  }, 2500);
 }
 
 function restartOverlay(data) {
@@ -536,7 +540,7 @@ function restartOverlay(data) {
   document.querySelectorAll('.slot').forEach(el => el.classList.remove('reveal'));
 
   buildSlots(data.drivers);
-  setTimeout(() => startReveal(data.drivers), 700);
+  setTimeout(() => startReveal(data.drivers), 1200);
 }
 
 let lastReplayAt = null;
