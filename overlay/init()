@@ -246,8 +246,8 @@
       bottom: 60px;
       justify-content: space-between;   /* gleichmäßig verteilt */
     }
-    #slots-left  { right: calc(50% + 20px); align-items: flex-end; }
-    #slots-right { left:  calc(50% + 20px); align-items: flex-start; }
+    #slots-left  { right: calc(50% + 60px); align-items: flex-end; }
+    #slots-right { left:  calc(50% + 60px); align-items: flex-start; }
 
     /* ── GRID SLOT ── */
     .slot {
@@ -337,6 +337,21 @@
       text-transform: uppercase;
     }
 
+    /* Ungerade Plätze (P1,P3,P5...) etwas höher */
+    #slots-left {
+      right: calc(50% + 80px);
+      align-items: flex-end;
+      top: 60px;           /* linke Spalte (ungerade) etwas höher */
+      bottom: 80px;
+    }
+    
+    #slots-right {
+      left: calc(50% + 80px);
+      align-items: flex-start;
+      top: 100px;          /* rechte Spalte (gerade) etwas tiefer */
+      bottom: 40px;
+    }
+
   </style>
 </head>
 <body>
@@ -374,8 +389,7 @@
     <div id="slots-right"></div>
 
     <div id="race-label">
-      <div id="race-label-sub">Grand Prix</div>
-      <div id="race-label-name">—</div>
+      <div id="race-label-name">Grand Prix</div>
     </div>
   </div>
 
@@ -622,7 +636,7 @@ function restartOverlay(data) {
   document.querySelectorAll('.slot').forEach(el => el.classList.remove('reveal'));
 
   // Set race name
-  document.getElementById('race-label-name').textContent = data.race;
+  // document.getElementById('race-label-name').textContent = data.race;
 
   // Rebuild slots
   buildSlots(data.drivers);
@@ -651,7 +665,7 @@ async function init() {
     const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
     const data = await res.json();
     lastReplayAt = data.replayAt || null;
-    document.getElementById('race-label-name').textContent = data.race;
+    // document.getElementById('race-label-name').textContent = data.race;
     buildSlots(data.drivers);
     setTimeout(() => startReveal(data.drivers), 800);
   } catch(e) { console.error('Init:', e); }
