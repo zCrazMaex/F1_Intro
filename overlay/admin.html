@@ -235,7 +235,7 @@ function renderGridTable(drivers) {
 
   drivers.forEach((d, i) => {
     const tr = document.createElement('tr');
-    const logoSrc = TEAM_LOGOS[d.team] || '';
+    const logoSrc = d.team ? (TEAM_LOGOS[d.team] || '') : '';
     tr.innerHTML = `
       <td class="pos">${d.position}</td>
       <td>
@@ -243,10 +243,10 @@ function renderGridTable(drivers) {
           <option value="">— wählen —</option>
         </select>
       </td>
-      <td><input type="text" id="grid-team-${i}" value="${d.team}" oninput="updateGridField(${i},'team',this.value)" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:5px 8px;border-radius:4px;width:100%"></td>
-      <td><input type="text" id="grid-num-${i}"  value="${d.number}" oninput="updateGridField(${i},'number',this.value)" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:5px 8px;border-radius:4px;width:60px"></td>
-      <td><input type="text" id="grid-key-${i}"  value="${d.assetKey}" oninput="updateGridField(${i},'assetKey',this.value)" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:5px 8px;border-radius:4px;width:120px"></td>
-      <td><img class="preview-img" src="${logoSrc}" onerror="this.style.display='none'" alt=""></td>
+      <td id="grid-team-${i}" style="color:#aaa;font-size:0.9rem;padding:6px 8px;">${d.team || ''}</td>
+      <td id="grid-num-${i}"  style="color:#aaa;font-size:0.9rem;padding:6px 8px;">${d.number || ''}</td>
+      <td id="grid-key-${i}"  style="color:#555;font-size:0.85rem;padding:6px 8px;">${d.assetKey || ''}</td>
+      <td><img class="preview-img" src="${logoSrc}" onerror="this.style.display='none'" style="${logoSrc ? '' : 'display:none'}" alt=""></td>
     `;
     tbody.appendChild(tr);
   });
@@ -271,13 +271,32 @@ function updateGridDropdowns() {
 }
 
 function applyGridDriver(index, assetKey) {
+  if (!assetKey) {
+    // Leer → alles zurücksetzen
+    currentGrid[index] = { ...currentGrid[index], name: '', team: '', number: '', assetKey: '' };
+    document.getElementById(`grid-team-${index}`).textContent = '';
+    document.getElementById(`grid-num-${index}`).textContent  = '';
+    document.getElementById(`grid-key-${index}`).textContent  = '';
+    // Logo verstecken
+    const img = document.querySelector(`#gridBody tr:nth-child(${index+1}) img`);
+    if (img) img.style.display = 'none';
+    return;
+  }
+
   const driver = ALL_DRIVERS.find(d => d.assetKey === assetKey);
   if (!driver) return;
   currentGrid[index] = { ...currentGrid[index], ...driver };
-  // Felder updaten
-  document.getElementById(`grid-team-${index}`).value = driver.team;
-  document.getElementById(`grid-num-${index}`).value  = driver.number;
-  document.getElementById(`grid-key-${index}`).value  = driver.assetKey;
+
+  document.getElementById(`grid-team-${index}`).textContent = driver.team;
+  document.getElementById(`grid-num-${index}`).textContent  = driver.number;
+  document.getElementById(`grid-key-${index}`).textContent  = driver.assetKey;
+
+  // Logo anzeigen
+  const img = document.querySelector(`#gridBody tr:nth-child(${index+1}) img`);
+  if (img) {
+    img.src = TEAM_LOGOS[driver.team] || '';
+    img.style.display = '';
+  }
 }
 
 function updateGridField(index, field, value) {
