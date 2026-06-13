@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>F1 Driver Intro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 1920px;
+      height: 1080px;
+      background: #000;
+      overflow: hidden;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    /* ── VIDEO LAYER ── */
+    #video-a, #video-b {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    #video-a.active, #video-b.active { opacity: 1; }
+
+    /* ── DARK VIGNETTE ── */
+    #vignette {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%),
+        linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 40%),
+        linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 30%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ── DIAGONAL STRIPE TEXTURE ── */
+    #texture {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      background: repeating-linear-gradient(
+        -45deg, transparent, transparent 8px,
+        rgba(0,0,0,0.04) 8px, rgba(0,0,0,0.04) 9px
+      );
+      pointer-events: none;
+    }
+
+    /* ── RED ACCENT LINE ── */
+    #accent-line {
+      position: absolute;
+      left: 80px;
+      bottom: 160px;
+      width: 0;
+      height: 4px;
+      background: #e10600;
+      z-index: 5;
+      transition: width 0.5s ease 0.3s;
+    }
+    #accent-line.show { width: 200px; }
+
+    /* ── DRIVER NAME ── */
+    #name-block {
+      position: absolute;
+      left: 80px;
+      bottom: 80px;
+      z-index: 5;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s;
+    }
+    #name-block.show { opacity: 1; transform: translateY(0); }
+
+    #driver-firstname {
+      font-size: 36px;
+      font-weight: 400;
+      font-style: italic;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: block;
+      line-height: 1;
+    }
+
+    #driver-lastname {
+      font-size: 110px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -2px;
+      text-transform: uppercase;
+      display: block;
+      line-height: 0.9;
+    }
+
+    #driver-team {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      margin-top: 8px;
+      display: block;
+    }
+
+    /* ── TEAM LOGO ── */
+    #team-logo {
+      position: absolute;
+      right: 100px;
+      bottom: 80px;
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.5s ease 0.7s;
+    }
+    #team-logo.show { opacity: 1; }
+
+    /* ── PROGRESS BAR (zeigt wie viele Fahrer noch kommen) ── */
+    #progress-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      z-index: 10;
+    }
+    #progress-fill {
+      height: 100%;
+      background: #e10600;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    /* ── DRIVER NUMBER klein oben rechts ── */
+    #driver-number {
+      position: absolute;
+      top: 40px;
+      right: 80px;
+      font-size: 180px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.06);
+      z-index: 4;
+      line-height: 1;
+      letter-spacing: -5px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<video id="video-a" muted playsinline></video>
+<video id="video-b" muted playsinline></video>
+
+<div id="vignette"></div>
+<div id="texture"></div>
+<div id="accent-line"></div>
+<div id="driver-number"></div>
+
+<div id="name-block">
+  <span id="driver-firstname"></span>
+  <span id="driver-lastname"></span>
+  <span id="driver-team"></span>
+</div>
+
+<img id="team-logo" src="" alt="">
+
+<script>
+const API_URL        = 'https://f1-intro-api.onrender.com';
+const GITHUB_RAW     = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
+const GITHUB_RAW_TEAMS = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/teams';
+
+// ── TEAM REIHENFOLGE – hier anpassen ──
+const TEAM_ORDER = [
+  'Cadillac',
+  'Alpine',
+  'Audi',
+  'Haas',
+  'Aston Martin',
+  'VCARB',
+  'Williams',
+  'Ferrari',
+  'Red Bull Racing',
+  'Mercedes',
+  'McLaren',
+];
+
+const TEAM_LOGOS = {
+  'Red Bull Racing': `${GITHUB_RAW_TEAMS}/redbull.png`,
+  'McLaren':         `${GITHUB_RAW_TEAMS}/mclaren.png`,
+  'Ferrari':         `${GITHUB_RAW_TEAMS}/ferrari.png`,
+  'Mercedes':        `${GITHUB_RAW_TEAMS}/mercedes.png`,
+  'Aston Martin':    `${GITHUB_RAW_TEAMS}/astonmartin.png`,
+  'Alpine':          `${GITHUB_RAW_TEAMS}/alpine.png`,
+  'Audi':            `${GITHUB_RAW_TEAMS}/audi.png`,
+  'Williams':        `${GITHUB_RAW_TEAMS}/williams.png`,
+  'VCARB':           `${GITHUB_RAW_TEAMS}/vcarb.png`,
+  'Haas':            `${GITHUB_RAW_TEAMS}/haas.png`,
+  'Cadillac':        `${GITHUB_RAW_TEAMS}/cadillac.png`,
+};
+
+const TEAM_COLORS = {
+  'Red Bull Racing': '#3671C6',
+  'McLaren':         '#FF8000',
+  'Ferrari':         '#E8002D',
+  'Mercedes':        '#27F4D2',
+  'Aston Martin':    '#229971',
+  'Alpine':          '#FF87BC',
+  'Audi':            '#C92D4B',
+  'Williams':        '#64C4FF',
+  'VCARB':           '#6692FF',
+  'Haas':            '#B6BABD',
+  'Cadillac':        '#FFFFFF',
+};
+
+function splitName(full) {
+  const parts = full.trim().split(' ');
+  if (parts.length < 2) return { first: '', last: full };
+  const last = parts.pop();
+  return { first: parts.join(' '), last };
+}
+
+// ── Fahrer in Team-Reihenfolge sortieren ──
+function sortDriversByTeam(drivers) {
+  const result = [];
+  TEAM_ORDER.forEach(team => {
+    const teamDrivers = drivers.filter(d => d.team === team);
+    // Innerhalb des Teams: niedrigere Startnummer zuerst
+    teamDrivers.sort((a, b) => a.number - b.number);
+    result.push(...teamDrivers);
+  });
+  // Fahrer ohne Team in TEAM_ORDER ans Ende
+  drivers.forEach(d => {
+    if (!TEAM_ORDER.includes(d.team) && !result.find(r => r.assetKey === d.assetKey)) {
+      result.push(d);
+    }
+  });
+  return result;
+}
+
+// ── Video Crossfade Player ──
+let currentVideo = 'a';
+let driverQueue  = [];
+let queueIndex   = 0;
+let lastReplayAt = null;
+
+const videoA = document.getElementById('video-a');
+const videoB = document.getElementById('video-b');
+
+function getActiveVideo()  { return currentVideo === 'a' ? videoA : videoB; }
+function getInactiveVideo(){ return currentVideo === 'a' ? videoB : videoA; }
+
+function showDriver(driver, index, total) {
+  const { first, last } = splitName(driver.name);
+  const color = TEAM_COLORS[driver.team] || '#e10600';
+  const logoSrc = TEAM_LOGOS[driver.team] || '';
+  const videoSrc = `${GITHUB_RAW}/${driver.assetKey}/intro.mp4`;
+
+  // Progress Bar
+  document.getElementById('progress-fill').style.width = `${((index + 1) / total) * 100}%`;
+
+  // Name & Team ausblenden
+  const nameBlock   = document.getElementById('name-block');
+  const accentLine  = document.getElementById('accent-line');
+  const teamLogo    = document.getElementById('team-logo');
+  nameBlock.classList.remove('show');
+  accentLine.classList.remove('show');
+  teamLogo.classList.remove('show');
+
+  // Neues Video in inaktiven Player laden
+  const nextVid = getInactiveVideo();
+  nextVid.src = videoSrc;
+  nextVid.load();
+
+  nextVid.oncanplay = () => {
+    nextVid.play();
+
+    // Crossfade
+    getActiveVideo().classList.remove('active');
+    nextVid.classList.add('active');
+    currentVideo = currentVideo === 'a' ? 'b' : 'a';
+
+    // Fahrerinfos einblenden
+    document.getElementById('driver-firstname').textContent = first.toUpperCase();
+    document.getElementById('driver-lastname').textContent  = last.toUpperCase();
+    document.getElementById('driver-team').textContent      = driver.team.toUpperCase();
+    document.getElementById('driver-team').style.color      = color;
+    document.getElementById('driver-number').textContent    = driver.number;
+    teamLogo.src = logoSrc;
+
+    setTimeout(() => {
+      accentLine.classList.add('show');
+      nameBlock.classList.add('show');
+      teamLogo.classList.add('show');
+    }, 200);
+
+    // Wenn Video endet → nächster Fahrer
+    nextVid.onended = () => {
+      queueIndex++;
+      if (queueIndex < driverQueue.length) {
+        showDriver(driverQueue[queueIndex], queueIndex, driverQueue.length);
+      }
+      // Wenn alle durch: nichts tun (OBS Szene wechseln oder loop)
+    };
+  };
+
+  // Fallback falls Video nicht lädt
+  nextVid.onerror = () => {
+    console.warn(`Video nicht gefunden für ${driver.assetKey}, überspringe...`);
+    queueIndex++;
+    if (queueIndex < driverQueue.length) {
+      setTimeout(() => showDriver(driverQueue[queueIndex], queueIndex, driverQueue.length), 500);
+    }
+  };
+}
+
+function startIntro(drivers) {
+  driverQueue = sortDriversByTeam(drivers);
+  queueIndex  = 0;
+  if (driverQueue.length > 0) {
+    showDriver(driverQueue[0], 0, driverQueue.length);
+  }
+}
+
+// ── Polling: startet neu wenn replayAt sich ändert ──
+async function checkForUpdates() {
+  try {
+    const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
+    const data = await res.json();
+    if (data.replayAt && data.replayAt !== lastReplayAt) {
+      lastReplayAt = data.replayAt;
+      // Reset
+      videoA.classList.remove('active');
+      videoB.classList.remove('active');
+      videoA.src = '';
+      videoB.src = '';
+      currentVideo = 'a';
+      startIntro(data.drivers);
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function init() {
+  try {
+    const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
+    const data = await res.json();
+    lastReplayAt = data.replayAt || null;
+    startIntro(data.drivers);
+  } catch(e) { console.error('Init:', e); }
+}
+
+init();
+setInterval(checkForUpdates, 5000);
+</script>
+</body>
+</html>
