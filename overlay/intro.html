@@ -15,7 +15,6 @@
       font-family: 'Barlow Condensed', sans-serif;
     }
 
-    /* ── VIDEO LAYER ── */
     #video-a, #video-b {
       position: absolute;
       inset: 0;
@@ -27,7 +26,6 @@
     }
     #video-a.active, #video-b.active { opacity: 1; }
 
-    /* ── DARK VIGNETTE ── */
     #vignette {
       position: absolute;
       inset: 0;
@@ -39,7 +37,6 @@
       pointer-events: none;
     }
 
-    /* ── DIAGONAL STRIPE TEXTURE ── */
     #texture {
       position: absolute;
       inset: 0;
@@ -51,7 +48,6 @@
       pointer-events: none;
     }
 
-    /* ── RED ACCENT LINE ── */
     #accent-line {
       position: absolute;
       left: 80px;
@@ -64,7 +60,6 @@
     }
     #accent-line.show { width: 200px; }
 
-    /* ── DRIVER NAME ── */
     #name-block {
       position: absolute;
       left: 80px;
@@ -106,7 +101,6 @@
       display: block;
     }
 
-    /* ── TEAM LOGO ── */
     #team-logo {
       position: absolute;
       right: 100px;
@@ -120,7 +114,6 @@
     }
     #team-logo.show { opacity: 1; }
 
-    /* ── PROGRESS BAR (zeigt wie viele Fahrer noch kommen) ── */
     #progress-bar {
       position: absolute;
       top: 0; left: 0; right: 0;
@@ -135,7 +128,6 @@
       width: 0%;
     }
 
-    /* ── DRIVER NUMBER klein oben rechts ── */
     #driver-number {
       position: absolute;
       top: 40px;
@@ -170,23 +162,22 @@
 <img id="team-logo" src="" alt="">
 
 <script>
-const API_URL        = 'https://f1-intro-api.onrender.com';
-const GITHUB_RAW        = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
+const API_URL          = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW_TEAMS = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/teams';
 
-// ── TEAM REIHENFOLGE – hier anpassen ──
+// ── TEAM REIHENFOLGE – schlechtestes Team zuerst ──
 const TEAM_ORDER = [
   'Cadillac',
-  'Alpine',
-  'Audi',
   'Haas',
-  'Aston Martin',
   'VCARB',
   'Williams',
-  'Ferrari',
-  'Red Bull Racing',
+  'Alpine',
+  'Audi',
+  'Aston Martin',
   'Mercedes',
+  'Ferrari',
   'McLaren',
+  'Red Bull Racing',
 ];
 
 const TEAM_LOGOS = {
@@ -204,18 +195,38 @@ const TEAM_LOGOS = {
 };
 
 const TEAM_COLORS = {
-  'Red Bull Racing': '#3671C6',
-  'McLaren':         '#FF8000',
-  'Ferrari':         '#E8002D',
-  'Mercedes':        '#27F4D2',
-  'Aston Martin':    '#229971',
-  'Alpine':          '#FF87BC',
-  'Audi':            '#C92D4B',
-  'Williams':        '#64C4FF',
-  'VCARB':           '#6692FF',
-  'Haas':            '#B6BABD',
-  'Cadillac':        '#FFFFFF',
+  'Red Bull Racing': '#3671C6', 'McLaren': '#FF8000', 'Ferrari': '#E8002D',
+  'Mercedes': '#27F4D2', 'Aston Martin': '#229971', 'Alpine': '#FF87BC',
+  'Audi': '#C92D4B', 'Williams': '#64C4FF', 'VCARB': '#6692FF',
+  'Haas': '#B6BABD', 'Cadillac': '#CC1E4A',
 };
+
+// Alle Fahrer – gleiche Liste wie in admin.html
+const ALL_DRIVERS = [
+  { name: 'Max Verstappen',        team: 'Red Bull Racing', number: 1,  assetKey: 'verstappen' },
+  { name: 'Liam Lawson',           team: 'Red Bull Racing', number: 30, assetKey: 'lawson' },
+  { name: 'Lando Norris',          team: 'McLaren',         number: 4,  assetKey: 'norris' },
+  { name: 'Oscar Piastri',         team: 'McLaren',         number: 81, assetKey: 'piastri' },
+  { name: 'Charles Leclerc',       team: 'Ferrari',         number: 16, assetKey: 'leclerc' },
+  { name: 'Lewis Hamilton',        team: 'Ferrari',         number: 44, assetKey: 'hamilton' },
+  { name: 'George Russell',        team: 'Mercedes',        number: 63, assetKey: 'russell' },
+  { name: 'Andrea Kimi Antonelli', team: 'Mercedes',        number: 12, assetKey: 'antonelli' },
+  { name: 'Fernando Alonso',       team: 'Aston Martin',    number: 14, assetKey: 'alonso' },
+  { name: 'Lance Stroll',          team: 'Aston Martin',    number: 18, assetKey: 'stroll' },
+  { name: 'Pierre Gasly',          team: 'Alpine',          number: 10, assetKey: 'gasly' },
+  { name: 'Jack Doohan',           team: 'Alpine',          number: 7,  assetKey: 'doohan' },
+  { name: 'Nico Hülkenberg',       team: 'Audi',            number: 27, assetKey: 'hulkenberg' },
+  { name: 'Gabriel Bortoleto',     team: 'Audi',            number: 5,  assetKey: 'bortoleto' },
+  { name: 'Carlos Sainz',          team: 'Williams',        number: 55, assetKey: 'sainz' },
+  { name: 'Alexander Albon',       team: 'Williams',        number: 23, assetKey: 'albon' },
+  { name: 'Yuki Tsunoda',          team: 'VCARB',           number: 22, assetKey: 'tsunoda' },
+  { name: 'Isack Hadjar',          team: 'VCARB',           number: 6,  assetKey: 'hadjar' },
+  { name: 'Esteban Ocon',          team: 'Haas',            number: 31, assetKey: 'ocon' },
+  { name: 'Oliver Bearman',        team: 'Haas',            number: 87, assetKey: 'bearman' },
+  { name: 'Colton Herta',          team: 'Cadillac',        number: 11, assetKey: 'bottas' },
+  { name: 'Felipe Drugovich',      team: 'Cadillac',        number: 34, assetKey: 'drugovich' },
+  { name: 'zCrazMaex',             team: 'Williams',        number: 21, assetKey: 'zcrazmaex' },
+];
 
 function splitName(full) {
   const parts = full.trim().split(' ');
@@ -224,42 +235,52 @@ function splitName(full) {
   return { first: parts.join(' '), last };
 }
 
-// ── Fahrer in Team-Reihenfolge sortieren ──
-function sortDriversByTeam(drivers) {
+// ── Teilnehmer in Team-Reihenfolge sortieren ──
+function sortByTeam(drivers) {
   const result = [];
   TEAM_ORDER.forEach(team => {
     const teamDrivers = drivers.filter(d => d.team === team);
-    // Innerhalb des Teams: niedrigere Startnummer zuerst
     teamDrivers.sort((a, b) => a.number - b.number);
     result.push(...teamDrivers);
   });
   // Fahrer ohne Team in TEAM_ORDER ans Ende
   drivers.forEach(d => {
-    if (!TEAM_ORDER.includes(d.team) && !result.find(r => r.assetKey === d.assetKey)) {
-      result.push(d);
-    }
+    if (!result.find(r => r.assetKey === d.assetKey)) result.push(d);
   });
   return result;
 }
 
-// ── Video Crossfade Player ──
+// ── Teilnehmer aus API-Daten zusammenbauen ──
+function buildQueue(data) {
+  // Neue Variante: data.participants enthält assetKeys der Teilnehmer
+  if (data.participants && data.participants.length > 0) {
+    const drivers = data.participants
+      .filter(key => key !== null)
+      .map(key => ALL_DRIVERS.find(d => d.assetKey === key))
+      .filter(d => d !== undefined);
+    return sortByTeam(drivers);
+  }
+  // Fallback: alle Fahrer aus dem Grid nehmen
+  return sortByTeam(data.drivers || []);
+}
+
+// ── Video Player ──
 let currentVideo = 'a';
 let driverQueue  = [];
 let queueIndex   = 0;
-let lastReplayAt = null;
 
 const videoA = document.getElementById('video-a');
 const videoB = document.getElementById('video-b');
 
-function getActiveVideo()  { return currentVideo === 'a' ? videoA : videoB; }
-function getInactiveVideo(){ return currentVideo === 'a' ? videoB : videoA; }
+function getActiveVideo()   { return currentVideo === 'a' ? videoA : videoB; }
+function getInactiveVideo() { return currentVideo === 'a' ? videoB : videoA; }
 
 function showDriver(driver, index, total) {
   const { first, last } = splitName(driver.name);
   const color    = TEAM_COLORS[driver.team] || '#e10600';
-  const logoSrc  = TEAM_LOGOS[driver.team] || '';
+  const logoSrc  = TEAM_LOGOS[driver.team]  || '';
   const videoSrc = `/videos/${driver.assetKey}.mp4`;
-  
+
   document.getElementById('progress-fill').style.width = `${((index + 1) / total) * 100}%`;
 
   const nameBlock  = document.getElementById('name-block');
@@ -315,42 +336,29 @@ function showDriver(driver, index, total) {
   };
 }
 
-function startIntro(drivers) {
-  driverQueue = sortDriversByTeam(drivers);
-  queueIndex  = 0;
+function startIntro(data) {
+  driverQueue  = buildQueue(data);
+  queueIndex   = 0;
+  currentVideo = 'a';
+  videoA.classList.remove('active');
+  videoB.classList.remove('active');
+  videoA.src = '';
+  videoB.src = '';
+
   if (driverQueue.length > 0) {
     showDriver(driverQueue[0], 0, driverQueue.length);
   }
-}
-
-// ── Polling: startet neu wenn replayAt sich ändert ──
-async function checkForUpdates() {
-  try {
-    const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
-    const data = await res.json();
-    if (data.replayAt && data.replayAt !== lastReplayAt) {
-      lastReplayAt = data.replayAt;
-      // Reset
-      videoA.classList.remove('active');
-      videoB.classList.remove('active');
-      videoA.src = '';
-      videoB.src = '';
-      currentVideo = 'a';
-      startIntro(data.drivers);
-    }
-  } catch(e) { console.error(e); }
 }
 
 async function init() {
   try {
     const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
     const data = await res.json();
-    startIntro(data.drivers);
+    startIntro(data);
   } catch(e) { console.error('Init:', e); }
 }
 
 init();
-// kein setInterval mehr nötig
 </script>
 </body>
 </html>
