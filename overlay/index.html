@@ -560,48 +560,51 @@ function startReveal(drivers) {
   document.getElementById('f1-logo').classList.add('show');
   document.getElementById('race-label').classList.add('show');
 
-  // Sequence: P22+P21 → P20+P19 → ... → P12+P11 → PAUSE → P10+P9 → ... → P2+P1
   const backPairs  = [];
   const frontPairs = [];
   for (let i = 22; i >= 11; i -= 2) backPairs.push([i, i-1]);
   for (let i = 10; i >= 1;  i -= 2) frontPairs.push([i, i-1]);
 
-  const allSteps = [...backPairs, null, ...frontPairs];
+  // Erstes Paar P22+P21 sofort zeigen
+  const firstPair = backPairs[0];
+  [firstPair[0], firstPair[1]].forEach(pos => {
+    const el = document.getElementById(`slot-p${pos}`);
+    if (el) el.classList.add('reveal');
+  });
+  const [posOdd0, posEven0] = firstPair[0] % 2 === 1 ? [firstPair[0], firstPair[1]] : [firstPair[1], firstPair[0]];
+  showPanelDrivers(posOdd0, posEven0, drivers);
+  currentFeaturedPositions = [posOdd0, posEven0];
+
+  // Rest der Paare ab Index 1 starten – erst nach 2000ms
+  const remainingSteps = [...backPairs.slice(1), null, ...frontPairs];
   let step = 0;
 
-  // Start with featured = last pair (P22+P21)
-  currentFeaturedPositions = [22, 21];
-
   revealInterval = setInterval(() => {
-    if (step >= allSteps.length) {
+    if (step >= remainingSteps.length) {
       clearInterval(revealInterval);
       revealInterval = null;
       return;
     }
 
-    const pair = allSteps[step];
+    const pair = remainingSteps[step];
     step++;
 
-    if (pair === null) {
-      // Pause tick – hide panels briefly, then show P10+P9 coming up
-      return;
-    }
+    if (pair === null) return;
 
     const [posOdd, posEven] = pair[0] % 2 === 1 ? [pair[0], pair[1]] : [pair[1], pair[0]];
 
-    // Reveal slot cards in center
     [pair[0], pair[1]].forEach(pos => {
       const el = document.getElementById(`slot-p${pos}`);
       if (el) el.classList.add('reveal');
     });
 
-    // Update featured driver panels (latest revealed pair)
     currentFeaturedPositions = [posOdd, posEven];
     showPanelDrivers(posOdd, posEven, drivers);
 
   }, 2000);
 }
 
+  
 /* ── RESTART ── */
 function restartOverlay(data) {
   if (revealInterval) { clearInterval(revealInterval); revealInterval = null; }
