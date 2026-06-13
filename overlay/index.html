@@ -401,6 +401,21 @@
 <script>
 const API_URL    = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
+const GITHUB_RAW_TEAMS = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/teams';
+
+const TEAM_LOGOS = {
+  'Red Bull Racing': `${GITHUB_RAW_TEAMS}/redbull.png`,
+  'McLaren':         `${GITHUB_RAW_TEAMS}/mclaren.png`,
+  'Ferrari':         `${GITHUB_RAW_TEAMS}/ferrari.png`,
+  'Mercedes':        `${GITHUB_RAW_TEAMS}/mercedes.png`,
+  'Aston Martin':    `${GITHUB_RAW_TEAMS}/astonmartin.png`,
+  'Alpine':          `${GITHUB_RAW_TEAMS}/alpine.png`,
+  'Sauber/Audi':     `${GITHUB_RAW_TEAMS}/sauber.png`,
+  'Williams':        `${GITHUB_RAW_TEAMS}/williams.png`,
+  'RB':              `${GITHUB_RAW_TEAMS}/rb.png`,
+  'Haas':            `${GITHUB_RAW_TEAMS}/haas.png`,
+  'Cadillac':        `${GITHUB_RAW_TEAMS}/cadillac.png`,
+};
 
 /* Team colours for name + slot background */
 const TEAM_COLORS = {
@@ -414,16 +429,21 @@ const TEAM_COLORS = {
   'Williams':        '#64C4FF',
   'RB':              '#6692FF',
   'Haas':            '#B6BABD',
+  'Cadillac':        '#CC1E4A',
 };
 
 /* Short 3-letter codes */
 const DRIVER_CODES = {
-  'verstappen':'VER','lawson':'LAW','norris':'NOR','piastri':'PIA',
-  'leclerc':'LEC','hamilton':'HAM','russell':'RUS','antonelli':'ANT',
-  'alonso':'ALO','stroll':'STR','gasly':'GAS','doohan':'DOO',
-  'hulkenberg':'HUL','bortoleto':'BOR','sainz':'SAI','albon':'ALB',
-  'tsunoda':'TSU','hadjar':'HAD','ocon':'OCO','bearman':'BEA',
-  'placeholder':'DRV',
+  // bestehende...
+  'verstappen':'VER', 'lawson':'LAW', 'norris':'NOR', 'piastri':'PIA',
+  'leclerc':'LEC',    'hamilton':'HAM','russell':'RUS','antonelli':'ANT',
+  'alonso':'ALO',     'stroll':'STR',  'gasly':'GAS',  'doohan':'DOO',
+  'hulkenberg':'HUL', 'bortoleto':'BOR','sainz':'SAI', 'albon':'ALB',
+  'tsunoda':'TSU',    'hadjar':'HAD',  'ocon':'OCO',   'bearman':'BEA',
+  'herta':'HER',      'drugovich':'DRU',
+  // Deine Liga-Fahrer ← hier ergänzen
+  'zcrazmaex':'ZCM',
+  'fahrer2':'FA2',
 };
 
 function ordinalSuffix(n) {
@@ -462,7 +482,7 @@ function buildSlots(drivers) {
 
     const color = teamColor(d.team);
     const code  = driverCode(d.assetKey);
-    const logoSrc = `${GITHUB_RAW}/${d.assetKey}/logo.png`;
+    const logoSrc = TEAM_LOGOS[driver.team] || '';
 
     // Slot inner: [pos] [team-logo] [name]
     slot.innerHTML = `
@@ -511,7 +531,7 @@ function updatePanel(side, driver) {
 
   portrait.src = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
   portrait.onerror = () => { portrait.style.opacity = 0; };
-  logo.src = `${GITHUB_RAW}/${driver.assetKey}/logo.png`;
+  logo.src = TEAM_LOGOS[driver.team] || '';
 
   team.textContent = driver.team;
   posNum.textContent = driver.position;
