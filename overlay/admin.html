@@ -349,8 +349,7 @@ function showStatus(msg, type) {
 }
 
 // ── INIT ──
-function init() {
-  // Standard-Grid mit 22 Plätzen
+async function init() {
   currentGrid = Array.from({ length: 22 }, (_, i) => ({
     position: i + 1, name: '', team: '', number: '', assetKey: ''
   }));
