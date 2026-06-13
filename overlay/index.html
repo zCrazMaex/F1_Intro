@@ -361,6 +361,18 @@ const API_URL        = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW     = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
 const GITHUB_RAW_TEAMS = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/teams';
 
+let ALL_DRIVERS = [];
+
+async function loadDriverPool() {
+  try {
+    const res  = await fetch(`${API_URL}/api/drivers`);
+    const data = await res.json();
+    ALL_DRIVERS = data.drivers || [];
+  } catch(e) {
+    console.error('Fahrer-Pool konnte nicht geladen werden:', e);
+  }
+}
+
 const TEAM_LOGOS = {
   'Red Bull Racing': `${GITHUB_RAW_TEAMS}/redbull.png`,
   'McLaren':         `${GITHUB_RAW_TEAMS}/mclaren.png`,
@@ -389,14 +401,16 @@ const TEAM_COLORS = {
   'Cadillac':        '#FFFFFF',
 };
 
-const DRIVER_CODES = {
-  'verstappen':'VER','lawson':'LAW','norris':'NOR','piastri':'PIA',
-  'leclerc':'LEC','hamilton':'HAM','russell':'RUS','antonelli':'ANT',
-  'alonso':'ALO','stroll':'STR','gasly':'GAS','doohan':'DOO',
-  'hulkenberg':'HUL','bortoleto':'BOR','sainz':'SAI','albon':'ALB',
-  'tsunoda':'TSU','hadjar':'HAD','ocon':'OCO','bearman':'BEA',
-  'herta':'HER','drugovich':'DRU','zcrazmaex':'ZCM',
-};
+// NEU – aus ALL_DRIVERS dynamisch ableiten:
+function driverCode(key) {
+  const driver = ALL_DRIVERS.find(d => d.assetKey === key);
+  if (driver) {
+    // Nachname nehmen, erste 3 Buchstaben
+    const parts = driver.name.trim().split(' ');
+    return parts[parts.length - 1].slice(0, 3).toUpperCase();
+  }
+  return key.slice(0, 3).toUpperCase();
+}
 
 function ordinalSuffix(n) {
   if (n===1) return 'ST'; if (n===2) return 'ND'; if (n===3) return 'RD'; return 'TH';
@@ -558,6 +572,7 @@ async function checkForUpdates() {
 
 async function init() {
   try {
+    await loadDriverPool();
     const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
     const data = await res.json();
     lastReplayAt = data.replayAt || null;
