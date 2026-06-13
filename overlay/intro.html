@@ -171,7 +171,8 @@
 
 <script>
 const API_URL        = 'https://f1-intro-api.onrender.com';
-const GITHUB_RAW     = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
+const GITHUB_RAW        = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
+const GITHUB_RAW_VIDEOS = 'https://media.githubusercontent.com/media/zCrazMaex/F1_Intro/main/assets/drivers';
 const GITHUB_RAW_TEAMS = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/teams';
 
 // ── TEAM REIHENFOLGE – hier anpassen ──
@@ -258,7 +259,7 @@ function showDriver(driver, index, total) {
   const { first, last } = splitName(driver.name);
   const color    = TEAM_COLORS[driver.team] || '#e10600';
   const logoSrc  = TEAM_LOGOS[driver.team] || '';
-  const videoSrc = `${GITHUB_RAW}/${driver.assetKey}/intro.mp4`;
+  const videoSrc = `${GITHUB_RAW_VIDEOS}/${driver.assetKey}/intro.mp4`;
 
   document.getElementById('progress-fill').style.width = `${((index + 1) / total) * 100}%`;
 
