@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Fahrer-Pool</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0f; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+    h2 { color: #e10600; letter-spacing: 3px; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th { background: #e10600; padding: 8px 12px; text-align: left; font-size: 0.8rem; }
+    td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; }
+    input { background: #1a1a2e; border: 1px solid #333; color: #fff; padding: 5px 8px; border-radius: 4px; width: 100%; }
+    .btn { padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn-primary { background: #e10600; color: #fff; margin-right: 8px; }
+    .btn-add { background: #1a3a1a; color: #4caf50; border: 1px solid #2a6a2a; }
+    .btn-del { background: #3a1a1a; color: #f44336; border: 1px solid #6a2a2a; padding: 4px 10px; }
+    .actions { margin-bottom: 16px; }
+    .status { padding: 10px; border-radius: 4px; margin-top: 10px; display: none; }
+    .status.success { background: #1a3a1a; border: 1px solid #2a6a2a; color: #4caf50; display: block; }
+  </style>
+</head>
+<body>
+<h2>🏎️ FAHRER-POOL VERWALTEN</h2>
+
+<div class="actions">
+  <button class="btn btn-primary" onclick="saveDrivers()">💾 Speichern</button>
+  <button class="btn btn-add" onclick="addDriver()">+ Fahrer hinzufügen</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>NAME</th>
+      <th>TEAM</th>
+      <th>NUMMER</th>
+      <th>ASSET KEY</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="driversBody"></tbody>
+</table>
+
+<div id="statusMsg" class="status"></div>
+
+<script>
+const API_URL = 'https://f1-intro-api.onrender.com';
+let drivers = [];
+
+function renderTable() {
+  const tbody = document.getElementById('driversBody');
+  tbody.innerHTML = '';
+  drivers.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input value="${d.name}"     oninput="drivers[${i}].name=this.value"></td>
+      <td><input value="${d.team}"     oninput="drivers[${i}].team=this.value"></td>
+      <td><input value="${d.number}"   oninput="drivers[${i}].number=this.value" style="width:70px"></td>
+      <td><input value="${d.assetKey}" oninput="drivers[${i}].assetKey=this.value"></td>
+      <td><button class="btn btn-del" onclick="removeDriver(${i})">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function addDriver() {
+  drivers.push({ name: '', team: '', number: '', assetKey: '' });
+  renderTable();
+}
+
+function removeDriver(i) {
+  drivers.splice(i, 1);
+  renderTable();
+}
+
+async function saveDrivers() {
+  try {
+    await fetch(`${API_URL}/api/drivers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ drivers })
+    });
+    const el = document.getElementById('statusMsg');
+    el.textContent = '✅ Gespeichert!';
+    el.className = 'status success';
+    setTimeout(() => el.className = 'status', 3000);
+  } catch(e) {
+    alert('Fehler: ' + e.message);
+  }
+}
+
+async function init() {
+  const res  = await fetch(`${API_URL}/api/drivers`);
+  const data = await res.json();
+  drivers = data.drivers || [];
+  renderTable();
+}
+
+init();
+</script>
+</body>
+</html>
