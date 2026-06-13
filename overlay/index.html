@@ -106,15 +106,15 @@
       position: absolute;
       bottom: 220px;
       z-index: 6;
-      width: 60px;
-      height: 60px;
+      width: 90px;
+      height: 90px;
       object-fit: contain;
       opacity: 0;
       transition: opacity 0.8s ease 1s;
     }
     .panel-left  .team-logo-corner { right: 40px; }
     .panel-right .team-logo-corner { left:  40px; }
-    .team-logo-corner.show { opacity: 0.6; }
+    .team-logo-corner.show { opacity: 1; }
 
     /* Position number big */
     .panel-position {
@@ -205,9 +205,9 @@
       background: #e10600;
     }
     #f1-logo-text {
-      font-size: 11px;
+      font-size: 16px;
       letter-spacing: 5px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.7);
       text-transform: uppercase;
     }
 
@@ -227,12 +227,14 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) rotate(90deg);
-      font-size: 11px;
+      font-size: 16px;
       letter-spacing: 6px;
-      color: rgba(255,255,255,0.5);
+      color: rgba(255,255,255,0.9);
       text-transform: uppercase;
       white-space: nowrap;
-      z-index: 2;
+      z-index: 4;
+      background: #0c0c14;
+      padding: 6px 14px;
     }
 
     /* Grid slot lists */
@@ -240,16 +242,17 @@
       position: absolute;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      top: 90px;
+      top: 80px;
+      bottom: 60px;
+      justify-content: space-between;   /* gleichmäßig verteilt */
     }
     #slots-left  { right: calc(50% + 20px); align-items: flex-end; }
     #slots-right { left:  calc(50% + 20px); align-items: flex-start; }
 
     /* ── GRID SLOT ── */
     .slot {
-      height: 40px;
-      width: 160px;
+      height: 52px;
+      width: 210px;
       display: flex;
       align-items: center;
       gap: 0;
@@ -271,34 +274,34 @@
     .slot-empty.show { opacity: 1; }
 
     .slot-pos {
-      width: 30px;
-      height: 40px;
+      width: 36px;
+      height: 52px;
       background: rgba(0,0,0,0.6);
       border: 1px solid rgba(255,255,255,0.12);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 700;
       color: rgba(255,255,255,0.6);
       flex-shrink: 0;
     }
 
     .slot-team-logo {
-      width: 22px;
-      height: 22px;
+      width: 28px;
+      height: 28px;
       object-fit: contain;
       flex-shrink: 0;
       margin: 0 5px;
     }
 
     .slot-name {
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
       padding: 0 8px;
-      height: 40px;
+      height: 52px;
       display: flex;
       align-items: center;
       flex: 1;
