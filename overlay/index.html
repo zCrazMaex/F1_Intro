@@ -482,7 +482,7 @@ function buildSlots(drivers) {
 
     const color = teamColor(d.team);
     const code  = driverCode(d.assetKey);
-    const logoSrc = TEAM_LOGOS[driver.team] || '';
+    const logoSrc = TEAM_LOGOS[d.team] || '';
 
     // Slot inner: [pos] [team-logo] [name]
     slot.innerHTML = `
