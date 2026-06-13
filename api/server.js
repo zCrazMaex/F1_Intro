@@ -14,6 +14,33 @@ const HEADERS = {
   'X-Bin-Meta': 'false'
 };
 
+// Fahrer-Pool laden
+app.get('/api/drivers', async (req, res) => {
+  try {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${process.env.JSONBIN_DRIVERS_ID}/latest`, {
+      headers: HEADERS
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Fahrer-Pool speichern
+app.post('/api/drivers', async (req, res) => {
+  try {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${process.env.JSONBIN_DRIVERS_ID}`, {
+      method: 'PUT',
+      headers: HEADERS,
+      body: JSON.stringify(req.body)
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Grid laden
 app.get('/api/grid', async (req, res) => {
   try {
