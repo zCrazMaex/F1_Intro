@@ -165,6 +165,18 @@
 const API_URL          = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW_TEAMS = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/teams';
 
+let ALL_DRIVERS = [];
+
+async function loadDriverPool() {
+  try {
+    const res  = await fetch(`${API_URL}/api/drivers`);
+    const data = await res.json();
+    ALL_DRIVERS = data.drivers || [];
+  } catch(e) {
+    console.error('Fahrer-Pool konnte nicht geladen werden:', e);
+  }
+}
+
 // ── TEAM REIHENFOLGE – schlechtestes Team zuerst ──
 const TEAM_ORDER = [
   'Cadillac',
@@ -201,32 +213,6 @@ const TEAM_COLORS = {
   'Haas': '#B6BABD', 'Cadillac': '#CC1E4A',
 };
 
-// Alle Fahrer – gleiche Liste wie in admin.html
-const ALL_DRIVERS = [
-  { name: 'Max Verstappen',        team: 'Red Bull Racing', number: 1,  assetKey: 'verstappen' },
-  { name: 'Liam Lawson',           team: 'Red Bull Racing', number: 30, assetKey: 'lawson' },
-  { name: 'Lando Norris',          team: 'McLaren',         number: 4,  assetKey: 'norris' },
-  { name: 'Oscar Piastri',         team: 'McLaren',         number: 81, assetKey: 'piastri' },
-  { name: 'Charles Leclerc',       team: 'Ferrari',         number: 16, assetKey: 'leclerc' },
-  { name: 'Lewis Hamilton',        team: 'Ferrari',         number: 44, assetKey: 'hamilton' },
-  { name: 'George Russell',        team: 'Mercedes',        number: 63, assetKey: 'russell' },
-  { name: 'Andrea Kimi Antonelli', team: 'Mercedes',        number: 12, assetKey: 'antonelli' },
-  { name: 'Fernando Alonso',       team: 'Aston Martin',    number: 14, assetKey: 'alonso' },
-  { name: 'Lance Stroll',          team: 'Aston Martin',    number: 18, assetKey: 'stroll' },
-  { name: 'Pierre Gasly',          team: 'Alpine',          number: 10, assetKey: 'gasly' },
-  { name: 'Jack Doohan',           team: 'Alpine',          number: 7,  assetKey: 'doohan' },
-  { name: 'Nico Hülkenberg',       team: 'Audi',            number: 27, assetKey: 'hulkenberg' },
-  { name: 'Gabriel Bortoleto',     team: 'Audi',            number: 5,  assetKey: 'bortoleto' },
-  { name: 'Carlos Sainz',          team: 'Williams',        number: 55, assetKey: 'sainz' },
-  { name: 'Alexander Albon',       team: 'Williams',        number: 23, assetKey: 'albon' },
-  { name: 'Yuki Tsunoda',          team: 'VCARB',           number: 22, assetKey: 'tsunoda' },
-  { name: 'Isack Hadjar',          team: 'VCARB',           number: 6,  assetKey: 'hadjar' },
-  { name: 'Esteban Ocon',          team: 'Haas',            number: 31, assetKey: 'ocon' },
-  { name: 'Oliver Bearman',        team: 'Haas',            number: 87, assetKey: 'bearman' },
-  { name: 'Colton Herta',          team: 'Cadillac',        number: 11, assetKey: 'bottas' },
-  { name: 'Felipe Drugovich',      team: 'Cadillac',        number: 34, assetKey: 'drugovich' },
-  { name: 'zCrazMaex',             team: 'Williams',        number: 21, assetKey: 'zcrazmaex' },
-];
 
 function splitName(full) {
   const parts = full.trim().split(' ');
@@ -352,6 +338,7 @@ function startIntro(data) {
 
 async function init() {
   try {
+    await loadDriverPool();
     const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
     const data = await res.json();
     startIntro(data);
