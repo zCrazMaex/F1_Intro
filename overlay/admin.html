@@ -5,69 +5,141 @@
   <title>F1 Grid Admin</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0a0a0f; color: #fff; font-family: 'Arial', sans-serif; padding: 20px; }
-    h1 { color: #e10600; margin-bottom: 20px; font-size: 1.5rem; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    input[type="text"] { background: #1a1a2e; border: 1px solid #333; color: #fff; padding: 6px 10px; border-radius: 4px; width: 100%; }
-    .race-input { margin-bottom: 20px; }
-    .race-input label { display: block; margin-bottom: 5px; color: #aaa; font-size: 0.85rem; }
-    .race-input input { max-width: 400px; font-size: 1rem; padding: 8px 12px; }
+    body { background: #0a0a0f; color: #fff; font-family: Arial, sans-serif; padding: 20px; }
+
+    h2 { color: #e10600; font-size: 1.1rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 30px; }
+
+    /* ── RACE INPUT ── */
+    .race-input { margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+    .race-input label { color: #aaa; font-size: 0.85rem; white-space: nowrap; }
+    .race-input input { background: #1a1a2e; border: 1px solid #333; color: #fff; padding: 8px 12px; border-radius: 4px; font-size: 1rem; width: 300px; }
+
+    /* ── PARTICIPANTS GRID ── */
+    #participants-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .participant-slot {
+      background: #111120;
+      border: 1px solid #222;
+      border-radius: 4px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .participant-slot .slot-num {
+      color: #e10600;
+      font-weight: bold;
+      font-size: 0.85rem;
+      width: 20px;
+      flex-shrink: 0;
+    }
+
+    .participant-slot select {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 4px;
+      flex: 1;
+      font-size: 0.85rem;
+    }
+
+    .participant-slot .team-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: #333;
+    }
+
+    /* ── BUTTONS ── */
+    .btn { padding: 10px 24px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; }
+    .btn-primary { background: #e10600; color: #fff; }
+    .btn-primary:hover { background: #ff1e00; }
+    .btn-secondary { background: #333; color: #fff; }
+    .btn-secondary:hover { background: #444; }
+    .btn-row { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+
+    /* ── GRID TABLE ── */
     .grid-table { width: 100%; border-collapse: collapse; }
     .grid-table th { background: #e10600; padding: 8px 12px; text-align: left; font-size: 0.8rem; letter-spacing: 1px; }
     .grid-table td { padding: 6px 8px; border-bottom: 1px solid #1a1a1a; }
     .grid-table tr:hover td { background: #1a1a2e; }
     .pos { color: #e10600; font-weight: bold; width: 40px; text-align: center; }
-    .btn { padding: 10px 24px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; }
-    .btn-primary { background: #e10600; color: #fff; }
-    .btn-primary:hover { background: #ff1e00; }
-    .btn-secondary { background: #333; color: #fff; margin-right: 10px; }
+
+    select { background: #1a1a2e; border: 1px solid #333; color: #fff; padding: 5px 8px; border-radius: 4px; width: 100%; }
+
+    .preview-img { width: 30px; height: 40px; object-fit: cover; border-radius: 3px; vertical-align: middle; }
+
     .status { padding: 10px 15px; border-radius: 4px; margin-top: 15px; display: none; }
     .status.success { background: #1a3a1a; border: 1px solid #2a6a2a; color: #4caf50; display: block; }
-    .status.error { background: #3a1a1a; border: 1px solid #6a2a2a; color: #f44336; display: block; }
-    .preview-img { width: 30px; height: 40px; object-fit: cover; border-radius: 3px; vertical-align: middle; }
-    .divider { background: #e10600; height: 2px; margin: 8px 0; }
-    .p10-divider td { border-top: 2px solid #e10600 !important; }
-    select { background: #1a1a2e; border: 1px solid #333; color: #fff; padding: 5px 8px; border-radius: 4px; }
+    .status.error   { background: #3a1a1a; border: 1px solid #6a2a2a; color: #f44336; display: block; }
+
+    #lastSaved { color: #666; font-size: 0.8rem; }
+
+    .divider { height: 1px; background: #222; margin: 24px 0; }
   </style>
 </head>
 <body>
-
-<h1>🏎️ F1 GRID MANAGER</h1>
 
 <div class="race-input">
   <label>RENNEN</label>
   <input type="text" id="raceName" placeholder="z.B. Monaco GP 2026">
 </div>
 
-<div class="header">
-  <div>
-    <button class="btn btn-secondary" onclick="loadGrid()">↺ Laden</button>
-    <button class="btn btn-primary" onclick="saveGrid()">💾 Speichern & Live</button>
-  </div>
-  <span id="lastSaved" style="color:#666; font-size:0.8rem;"></span>
+<!-- ── SECTION 1: TEILNEHMER ── -->
+<div class="section">
+  <h2>① Teilnehmer (wer fährt heute)</h2>
+  <div id="participants-grid"></div>
 </div>
 
-<table class="grid-table">
-  <thead>
-    <tr>
-      <th>P</th>
-      <th>NAME</th>
-      <th>TEAM</th>
-      <th>NR</th>
-      <th>ASSET KEY</th>
-      <th>VORSCHAU</th>
-    </tr>
-  </thead>
-  <tbody id="gridBody"></tbody>
-</table>
+<div class="divider"></div>
+
+<!-- ── SECTION 2: STARTAUFSTELLUNG ── -->
+<div class="section">
+  <h2>② Startaufstellung</h2>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="loadGrid()">↺ Laden</button>
+    <button class="btn btn-primary" onclick="saveGrid()">💾 Speichern &amp; Live</button>
+    <span id="lastSaved"></span>
+  </div>
+
+  <table class="grid-table">
+    <thead>
+      <tr>
+        <th>P</th>
+        <th>FAHRER</th>
+        <th>TEAM</th>
+        <th>NR</th>
+        <th>ASSET KEY</th>
+        <th>VORSCHAU</th>
+      </tr>
+    </thead>
+    <tbody id="gridBody"></tbody>
+  </table>
+</div>
 
 <div id="statusMsg" class="status"></div>
 
 <script>
-// ⚠️ DEINE RENDER API URL HIER EINTRAGEN
-const API_URL = 'https://f1-intro-api.onrender.com';
-const GITHUB_RAW = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
+const API_URL          = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW_TEAMS = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/teams';
+
+const TEAM_COLORS = {
+  'Red Bull Racing': '#3671C6', 'McLaren': '#FF8000', 'Ferrari': '#E8002D',
+  'Mercedes': '#27F4D2', 'Aston Martin': '#229971', 'Alpine': '#FF87BC',
+  'Audi': '#C92D4B', 'Williams': '#64C4FF', 'VCARB': '#6692FF',
+  'Haas': '#B6BABD', 'Cadillac': '#CC1E4A',
+};
 
 const TEAM_LOGOS = {
   'Red Bull Racing': `${GITHUB_RAW_TEAMS}/redbull.png`,
@@ -83,136 +155,196 @@ const TEAM_LOGOS = {
   'Cadillac':        `${GITHUB_RAW_TEAMS}/cadillac.png`,
 };
 
-const DRIVER_TEMPLATES = [
-  // Red Bull Racing
+// ── KOMPLETTER FAHRER-POOL (alle möglichen Fahrer inkl. Ersatzfahrer) ──
+const ALL_DRIVERS = [
   { name: 'Max Verstappen',        team: 'Red Bull Racing', number: 1,  assetKey: 'verstappen' },
   { name: 'Liam Lawson',           team: 'Red Bull Racing', number: 30, assetKey: 'lawson' },
-  // McLaren
   { name: 'Lando Norris',          team: 'McLaren',         number: 4,  assetKey: 'norris' },
   { name: 'Oscar Piastri',         team: 'McLaren',         number: 81, assetKey: 'piastri' },
-  // Ferrari
   { name: 'Charles Leclerc',       team: 'Ferrari',         number: 16, assetKey: 'leclerc' },
   { name: 'Lewis Hamilton',        team: 'Ferrari',         number: 44, assetKey: 'hamilton' },
-  // Mercedes
   { name: 'George Russell',        team: 'Mercedes',        number: 63, assetKey: 'russell' },
   { name: 'Andrea Kimi Antonelli', team: 'Mercedes',        number: 12, assetKey: 'antonelli' },
-  // Aston Martin
   { name: 'Fernando Alonso',       team: 'Aston Martin',    number: 14, assetKey: 'alonso' },
   { name: 'Lance Stroll',          team: 'Aston Martin',    number: 18, assetKey: 'stroll' },
-  // Alpine
   { name: 'Pierre Gasly',          team: 'Alpine',          number: 10, assetKey: 'gasly' },
   { name: 'Jack Doohan',           team: 'Alpine',          number: 7,  assetKey: 'doohan' },
-  // Audi
   { name: 'Nico Hülkenberg',       team: 'Audi',            number: 27, assetKey: 'hulkenberg' },
   { name: 'Gabriel Bortoleto',     team: 'Audi',            number: 5,  assetKey: 'bortoleto' },
-  // Williams
   { name: 'Carlos Sainz',          team: 'Williams',        number: 55, assetKey: 'sainz' },
   { name: 'Alexander Albon',       team: 'Williams',        number: 23, assetKey: 'albon' },
-  // VCARB
   { name: 'Yuki Tsunoda',          team: 'VCARB',           number: 22, assetKey: 'tsunoda' },
   { name: 'Isack Hadjar',          team: 'VCARB',           number: 6,  assetKey: 'hadjar' },
-  // Haas
   { name: 'Esteban Ocon',          team: 'Haas',            number: 31, assetKey: 'ocon' },
   { name: 'Oliver Bearman',        team: 'Haas',            number: 87, assetKey: 'bearman' },
-  // Cadillac
   { name: 'Colton Herta',          team: 'Cadillac',        number: 11, assetKey: 'bottas' },
   { name: 'Felipe Drugovich',      team: 'Cadillac',        number: 34, assetKey: 'drugovich' },
-
-  // ── DEINE LIGA-FAHRER HIER EINTRAGEN ──
-  // Format: { name: 'Vor Nachname', team: 'Teamname', number: 99, assetKey: 'nachname' },
-  // assetKey = Ordnername in assets/drivers/ auf GitHub (nur Kleinbuchstaben, kein Leerzeichen)
-  { name: 'zCrazMaex',         team: 'Williams',       number: 21, assetKey: 'maex' },
-  { name: 'Dein Fahrer 2',         team: 'Dein Team',       number: 98, assetKey: 'fahrer2' },
-  // beliebig viele weitere...
+  // ── ERSATZFAHRER & LIGA-FAHRER ──
+  { name: 'zCrazMaex',             team: 'Williams',        number: 21, assetKey: 'zcrazmaex' },
 ];
 
-let currentGrid = [];
+let participants = Array(22).fill(null); // 22 Teilnehmer-Slots
+let currentGrid  = [];                   // Startaufstellung
 
-function renderTable(drivers) {
-  const tbody = document.getElementById('gridBody');
-  tbody.innerHTML = '';
-  drivers.forEach((d, i) => {
-    const tr = document.createElement('tr');
-    if (d.position === 11) tr.className = 'p10-divider';
-    const portraitUrl = `${GITHUB_RAW}/${d.assetKey}/portrait.png`;
-    tr.innerHTML = `
-      <td class="pos">${d.position}</td>
-      <td>
-        <select onchange="applyTemplate(${i}, this.value)">
-          <option value="">-- Fahrer wählen --</option>
-          ${DRIVER_TEMPLATES.map(t =>
-            `<option value="${t.assetKey}" ${t.assetKey === d.assetKey ? 'selected' : ''}>${t.name}</option>`
-          ).join('')}
-        </select>
-      </td>
-      <td><input type="text" value="${d.team}" oninput="updateDriver(${i}, 'team', this.value)" placeholder="Team"></td>
-      <td><input type="text" value="${d.number}" oninput="updateDriver(${i}, 'number', this.value)" style="width:60px"></td>
-      <td><input type="text" value="${d.assetKey}" oninput="updateDriver(${i}, 'assetKey', this.value)" placeholder="ordnername"></td>
-      <td><img class="preview-img" src="${TEAM_LOGOS[d.team] || ''}" onerror="this.style.display='none'" alt="${d.team}"></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+// ── TEILNEHMER SEKTION AUFBAUEN ──
+function buildParticipantsUI() {
+  const container = document.getElementById('participants-grid');
+  container.innerHTML = '';
 
-function applyTemplate(index, assetKey) {
-  const template = DRIVER_TEMPLATES.find(t => t.assetKey === assetKey);
-  if (!template) return;
-  currentGrid[index] = { ...currentGrid[index], ...template };
-  renderTable(currentGrid);
-}
+  for (let i = 0; i < 22; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'participant-slot';
 
-function updateDriver(index, field, value) {
-  currentGrid[index][field] = value;
-}
+    const dot = document.createElement('div');
+    dot.className = 'team-dot';
+    dot.id = `pdot-${i}`;
 
-async function loadGrid() {
-  try {
-    const res = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
-    const data = await res.json();
-    document.getElementById('raceName').value = data.race || '';
-    currentGrid = data.drivers;
-    renderTable(currentGrid);
-    document.getElementById('lastSaved').textContent =
-      `Zuletzt gespeichert: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
-  } catch (err) {
-    showStatus('Fehler beim Laden: ' + err.message, 'error');
-    // Fallback: leeres Grid mit 22 Plätzen
-    currentGrid = Array.from({length: 22}, (_, i) => ({
-      position: i + 1,
-      name: DRIVER_TEMPLATES[i]?.name || `Fahrer ${i+1}`,
-      team: DRIVER_TEMPLATES[i]?.team || 'Team',
-      number: DRIVER_TEMPLATES[i]?.number || i+1,
-      assetKey: DRIVER_TEMPLATES[i]?.assetKey || 'placeholder'
-    }));
-    renderTable(currentGrid);
+    const num = document.createElement('span');
+    num.className = 'slot-num';
+    num.textContent = `${i+1}.`;
+
+    const sel = document.createElement('select');
+    sel.id = `participant-${i}`;
+    sel.innerHTML = `<option value="">— Fahrer wählen —</option>`;
+    ALL_DRIVERS.forEach(d => {
+      sel.innerHTML += `<option value="${d.assetKey}">${d.name} (${d.team})</option>`;
+    });
+
+    // Beim Ändern: dot-Farbe updaten + Startaufstellung-Dropdowns neu befüllen
+    sel.addEventListener('change', () => {
+      updateParticipants();
+      updateGridDropdowns();
+    });
+
+    slot.appendChild(num);
+    slot.appendChild(dot);
+    slot.appendChild(sel);
+    container.appendChild(slot);
   }
 }
 
-async function saveGrid() {
-  const payload = {
-    race: document.getElementById('raceName').value,
-    drivers: currentGrid
-  };
+// Teilnehmer-Array aus Dropdowns lesen + Dots einfärben
+function updateParticipants() {
+  participants = [];
+  for (let i = 0; i < 22; i++) {
+    const val = document.getElementById(`participant-${i}`).value;
+    const driver = ALL_DRIVERS.find(d => d.assetKey === val) || null;
+    participants[i] = driver;
+
+    const dot = document.getElementById(`pdot-${i}`);
+    dot.style.background = driver ? (TEAM_COLORS[driver.team] || '#666') : '#333';
+  }
+}
+
+// ── STARTAUFSTELLUNG TABELLE ──
+function renderGridTable(drivers) {
+  const tbody = document.getElementById('gridBody');
+  tbody.innerHTML = '';
+
+  drivers.forEach((d, i) => {
+    const tr = document.createElement('tr');
+    const logoSrc = TEAM_LOGOS[d.team] || '';
+    tr.innerHTML = `
+      <td class="pos">${d.position}</td>
+      <td>
+        <select id="grid-select-${i}" onchange="applyGridDriver(${i}, this.value)">
+          <option value="">— wählen —</option>
+        </select>
+      </td>
+      <td><input type="text" id="grid-team-${i}" value="${d.team}" oninput="updateGridField(${i},'team',this.value)" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:5px 8px;border-radius:4px;width:100%"></td>
+      <td><input type="text" id="grid-num-${i}"  value="${d.number}" oninput="updateGridField(${i},'number',this.value)" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:5px 8px;border-radius:4px;width:60px"></td>
+      <td><input type="text" id="grid-key-${i}"  value="${d.assetKey}" oninput="updateGridField(${i},'assetKey',this.value)" style="background:#1a1a2e;border:1px solid #333;color:#fff;padding:5px 8px;border-radius:4px;width:120px"></td>
+      <td><img class="preview-img" src="${logoSrc}" onerror="this.style.display='none'" alt=""></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  updateGridDropdowns();
+}
+
+// Dropdowns in der Startaufstellung mit aktuellen Teilnehmern befüllen
+function updateGridDropdowns() {
+  updateParticipants();
+  const activeParts = participants.filter(p => p !== null);
+
+  for (let i = 0; i < currentGrid.length; i++) {
+    const sel = document.getElementById(`grid-select-${i}`);
+    if (!sel) continue;
+    const currentKey = currentGrid[i].assetKey;
+    sel.innerHTML = `<option value="">— wählen —</option>`;
+    activeParts.forEach(d => {
+      sel.innerHTML += `<option value="${d.assetKey}" ${d.assetKey === currentKey ? 'selected' : ''}>${d.name}</option>`;
+    });
+  }
+}
+
+function applyGridDriver(index, assetKey) {
+  const driver = ALL_DRIVERS.find(d => d.assetKey === assetKey);
+  if (!driver) return;
+  currentGrid[index] = { ...currentGrid[index], ...driver };
+  // Felder updaten
+  document.getElementById(`grid-team-${index}`).value = driver.team;
+  document.getElementById(`grid-num-${index}`).value  = driver.number;
+  document.getElementById(`grid-key-${index}`).value  = driver.assetKey;
+}
+
+function updateGridField(index, field, value) {
+  currentGrid[index][field] = value;
+}
+
+// ── LADEN ──
+async function loadGrid() {
   try {
-    // Schritt 1: Grid speichern
-    const res = await fetch(`${API_URL}/api/grid`, {
+    const res  = await fetch(`${API_URL}/api/grid?t=${Date.now()}`);
+    const data = await res.json();
+
+    document.getElementById('raceName').value = data.race || '';
+
+    // Teilnehmer laden falls gespeichert
+    if (data.participants) {
+      data.participants.forEach((key, i) => {
+        const sel = document.getElementById(`participant-${i}`);
+        if (sel && key) sel.value = key;
+      });
+      updateParticipants();
+    }
+
+    currentGrid = data.drivers || [];
+    renderGridTable(currentGrid);
+
+    if (data.updatedAt) {
+      document.getElementById('lastSaved').textContent =
+        `Zuletzt: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
+    }
+  } catch(err) {
+    showStatus('Fehler beim Laden: ' + err.message, 'error');
+  }
+}
+
+// ── SPEICHERN ──
+async function saveGrid() {
+  updateParticipants();
+
+  const payload = {
+    race:         document.getElementById('raceName').value,
+    participants: participants.map(p => p ? p.assetKey : null),
+    drivers:      currentGrid,
+  };
+
+  try {
+    const res  = await fetch(`${API_URL}/api/grid`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     const data = await res.json();
-    console.log('Grid gespeichert:', data);
 
-    // Schritt 2: Replay triggern
-    const replayRes = await fetch(`${API_URL}/api/replay`, { method: 'POST' });
-    const replayData = await replayRes.json();
-    console.log('Replay getriggert:', replayData);
+    await fetch(`${API_URL}/api/replay`, { method: 'POST' });
 
-    showStatus('✅ Gespeichert! Animation startet in OBS...', 'success');
+    showStatus('✅ Gespeichert! Overlay & Intro werden aktualisiert.', 'success');
     document.getElementById('lastSaved').textContent =
-      `Zuletzt gespeichert: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
-  } catch (err) {
-    console.error('Fehler:', err);
+      `Zuletzt: ${new Date(data.updatedAt).toLocaleString('de-DE')}`;
+  } catch(err) {
     showStatus('Fehler: ' + err.message, 'error');
   }
 }
@@ -221,11 +353,22 @@ function showStatus(msg, type) {
   const el = document.getElementById('statusMsg');
   el.textContent = msg;
   el.className = `status ${type}`;
-  setTimeout(() => el.className = 'status', 4000);
+  setTimeout(() => el.className = 'status', 5000);
 }
-  
-loadGrid();
-  
+
+// ── INIT ──
+function init() {
+  // Standard-Grid mit 22 Plätzen
+  currentGrid = Array.from({ length: 22 }, (_, i) => ({
+    position: i + 1, name: '', team: '', number: '', assetKey: ''
+  }));
+
+  buildParticipantsUI();
+  renderGridTable(currentGrid);
+  loadGrid();
+}
+
+init();
 </script>
 </body>
 </html>
