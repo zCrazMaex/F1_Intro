@@ -69,26 +69,46 @@ const API_URL = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW = 'https://github.com/zCrazMaex/F1_Intro/main/assets/drivers';
 
 const DRIVER_TEMPLATES = [
-  { name: 'Max Verstappen', team: 'Red Bull Racing', number: 1, assetKey: 'verstappen' },
-  { name: 'Liam Lawson', team: 'Red Bull Racing', number: 30, assetKey: 'lawson' },
-  { name: 'Lando Norris', team: 'McLaren', number: 4, assetKey: 'norris' },
-  { name: 'Oscar Piastri', team: 'McLaren', number: 81, assetKey: 'piastri' },
-  { name: 'Charles Leclerc', team: 'Ferrari', number: 16, assetKey: 'leclerc' },
-  { name: 'Lewis Hamilton', team: 'Ferrari', number: 44, assetKey: 'hamilton' },
-  { name: 'George Russell', team: 'Mercedes', number: 63, assetKey: 'russell' },
-  { name: 'Andrea Kimi Antonelli', team: 'Mercedes', number: 12, assetKey: 'antonelli' },
-  { name: 'Fernando Alonso', team: 'Aston Martin', number: 14, assetKey: 'alonso' },
-  { name: 'Lance Stroll', team: 'Aston Martin', number: 18, assetKey: 'stroll' },
-  { name: 'Pierre Gasly', team: 'Alpine', number: 10, assetKey: 'gasly' },
-  { name: 'Jack Doohan', team: 'Alpine', number: 7, assetKey: 'doohan' },
-  { name: 'Nico Hülkenberg', team: 'Sauber/Audi', number: 27, assetKey: 'hulkenberg' },
-  { name: 'Gabriel Bortoleto', team: 'Sauber/Audi', number: 5, assetKey: 'bortoleto' },
-  { name: 'Carlos Sainz', team: 'Williams', number: 55, assetKey: 'sainz' },
-  { name: 'Alexander Albon', team: 'Williams', number: 23, assetKey: 'albon' },
-  { name: 'Yuki Tsunoda', team: 'RB', number: 22, assetKey: 'tsunoda' },
-  { name: 'Isack Hadjar', team: 'RB', number: 6, assetKey: 'hadjar' },
-  { name: 'Esteban Ocon', team: 'Haas', number: 31, assetKey: 'ocon' },
-  { name: 'Oliver Bearman', team: 'Haas', number: 87, assetKey: 'bearman' },
+  // Red Bull Racing
+  { name: 'Max Verstappen',        team: 'Red Bull Racing', number: 1,  assetKey: 'verstappen' },
+  { name: 'Liam Lawson',           team: 'Red Bull Racing', number: 30, assetKey: 'lawson' },
+  // McLaren
+  { name: 'Lando Norris',          team: 'McLaren',         number: 4,  assetKey: 'norris' },
+  { name: 'Oscar Piastri',         team: 'McLaren',         number: 81, assetKey: 'piastri' },
+  // Ferrari
+  { name: 'Charles Leclerc',       team: 'Ferrari',         number: 16, assetKey: 'leclerc' },
+  { name: 'Lewis Hamilton',        team: 'Ferrari',         number: 44, assetKey: 'hamilton' },
+  // Mercedes
+  { name: 'George Russell',        team: 'Mercedes',        number: 63, assetKey: 'russell' },
+  { name: 'Andrea Kimi Antonelli', team: 'Mercedes',        number: 12, assetKey: 'antonelli' },
+  // Aston Martin
+  { name: 'Fernando Alonso',       team: 'Aston Martin',    number: 14, assetKey: 'alonso' },
+  { name: 'Lance Stroll',          team: 'Aston Martin',    number: 18, assetKey: 'stroll' },
+  // Alpine
+  { name: 'Pierre Gasly',          team: 'Alpine',          number: 10, assetKey: 'gasly' },
+  { name: 'Jack Doohan',           team: 'Alpine',          number: 7,  assetKey: 'doohan' },
+  // Sauber/Audi
+  { name: 'Nico Hülkenberg',       team: 'Sauber/Audi',     number: 27, assetKey: 'hulkenberg' },
+  { name: 'Gabriel Bortoleto',     team: 'Sauber/Audi',     number: 5,  assetKey: 'bortoleto' },
+  // Williams
+  { name: 'Carlos Sainz',          team: 'Williams',        number: 55, assetKey: 'sainz' },
+  { name: 'Alexander Albon',       team: 'Williams',        number: 23, assetKey: 'albon' },
+  // RB
+  { name: 'Yuki Tsunoda',          team: 'RB',              number: 22, assetKey: 'tsunoda' },
+  { name: 'Isack Hadjar',          team: 'RB',              number: 6,  assetKey: 'hadjar' },
+  // Haas
+  { name: 'Esteban Ocon',          team: 'Haas',            number: 31, assetKey: 'ocon' },
+  { name: 'Oliver Bearman',        team: 'Haas',            number: 87, assetKey: 'bearman' },
+  // Cadillac  ← NEU
+  { name: 'Colton Herta',          team: 'Cadillac',        number: 11, assetKey: 'herta' },
+  { name: 'Felipe Drugovich',      team: 'Cadillac',        number: 34, assetKey: 'drugovich' },
+
+  // ── DEINE LIGA-FAHRER HIER EINTRAGEN ──
+  // Format: { name: 'Vor Nachname', team: 'Teamname', number: 99, assetKey: 'nachname' },
+  // assetKey = Ordnername in assets/drivers/ auf GitHub (nur Kleinbuchstaben, kein Leerzeichen)
+  { name: 'zCrazMaex',         team: 'Williams',       number: 21, assetKey: 'zcrazmaex' },
+  { name: 'Dein Fahrer 2',         team: 'Dein Team',       number: 98, assetKey: 'fahrer2' },
+  // beliebig viele weitere...
 ];
 
 let currentGrid = [];
