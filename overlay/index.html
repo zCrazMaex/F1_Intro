@@ -517,22 +517,22 @@ function updatePanel(side, driver) {
   const panelTeam= document.getElementById(`team-${side}`);
   const panelLogo= document.getElementById(`logo-${side}`);
 
-  // Hide first
-  portrait.classList.remove('show');
-  panelName.classList.remove('show');
-  panelPos.classList.remove('show');
-  panelTeam.classList.remove('show');
-  panelLogo.classList.remove('show');
-
   if (!driver) return;
 
   const { first, last } = splitName(driver.name);
   const color = teamColor(driver.team);
 
-  portrait.src = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
-  portrait.onerror = () => { portrait.style.opacity = 0; };
-  logo.src = TEAM_LOGOS[driver.team] || '';
+  // Erst alles ausblenden
+  portrait.classList.remove('show');
+  panelName.classList.remove('show');
+  panelPos.classList.remove('show');
+  panelTeam.classList.remove('show');
+  panelLogo.classList.remove('show');
+  portrait.style.opacity = '';
 
+  // Daten setzen BEVOR eingeblendet wird
+  portrait.src = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
+  logo.src = TEAM_LOGOS[driver.team] || '';
   team.textContent = driver.team;
   posNum.textContent = driver.position;
   posSfx.textContent = ordinalSuffix(driver.position);
@@ -540,12 +540,14 @@ function updatePanel(side, driver) {
   nameLast.textContent  = last.toUpperCase();
   nameLast.style.color  = color;
 
-  // Staggered reveal
-  setTimeout(() => portrait.classList.add('show'),  50);
-  setTimeout(() => panelTeam.classList.add('show'), 400);
-  setTimeout(() => panelLogo.classList.add('show'), 600);
-  setTimeout(() => panelPos.classList.add('show'),  700);
-  setTimeout(() => panelName.classList.add('show'), 850);
+  // Kurz warten damit der Browser das neue src verarbeitet, dann einblenden
+  setTimeout(() => {
+    portrait.classList.add('show');
+    panelTeam.classList.add('show');
+  }, 100);
+  setTimeout(() => panelLogo.classList.add('show'), 400);
+  setTimeout(() => panelPos.classList.add('show'),  550);
+  setTimeout(() => panelName.classList.add('show'), 700);
 }
 
 /* ── REVEAL ANIMATION ── */
