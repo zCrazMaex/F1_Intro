@@ -482,41 +482,39 @@ function showPanelDrivers(posOdd, posEven, drivers) {
 
   // Beide gleichzeitig ausblenden
   ['left', 'right'].forEach(side => {
-    ['portrait','team','logo','pos','name'].forEach(el => {
-      document.getElementById(el === 'pos' ? `pos-${side}` : el === 'name' ? `name-${side}` : `${el}-${side}`)?.classList.remove('show');
-    });
+    document.getElementById(`portrait-${side}`)?.classList.remove('show');
+    document.getElementById(`team-${side}`)?.classList.remove('show');
+    document.getElementById(`logo-${side}`)?.classList.remove('show');
+    document.getElementById(`pos-${side}`)?.classList.remove('show');
+    document.getElementById(`name-${side}`)?.classList.remove('show');
   });
 
-  // Daten beider Panels sofort setzen
+  // Daten sofort setzen
   if (dLeft)  updatePanel('left',  dLeft);
   if (dRight) updatePanel('right', dRight);
 
-  // Beide gleichzeitig einblenden mit gleichen Timings
+  // Alle Timings mit lokalen Variablen die im Closure verfügbar sind
+  const hasLeft  = dLeft  !== null;
+  const hasRight = dRight !== null;
+
   setTimeout(() => {
-    if (dLeft)  { document.getElementById('portrait-left')?.classList.add('show');  document.getElementById('team-left')?.classList.add('show'); }
-    if (dRight) { document.getElementById('portrait-right')?.classList.add('show'); document.getElementById('team-right')?.classList.add('show'); }
+    if (hasLeft)  { document.getElementById('portrait-left')?.classList.add('show');  document.getElementById('team-left')?.classList.add('show'); }
+    if (hasRight) { document.getElementById('portrait-right')?.classList.add('show'); document.getElementById('team-right')?.classList.add('show'); }
   }, 250);
   setTimeout(() => {
-    if (dLeft)  document.getElementById('logo-left')?.classList.add('show');
-    if (dRight) document.getElementById('logo-right')?.classList.add('show');
+    if (hasLeft)  document.getElementById('logo-left')?.classList.add('show');
+    if (hasRight) document.getElementById('logo-right')?.classList.add('show');
   }, 550);
   setTimeout(() => {
-    if (dLeft)  document.getElementById('pos-left')?.classList.add('show');
-    if (dRight) document.getElementById('pos-right')?.classList.add('show');
+    if (hasLeft)  document.getElementById('pos-left')?.classList.add('show');
+    if (hasRight) document.getElementById('pos-right')?.classList.add('show');
   }, 700);
   setTimeout(() => {
-    if (dLeft)  document.getElementById('name-left')?.classList.add('show');
-    if (dRight) document.getElementById('name-right')?.classList.add('show');
+    if (hasLeft)  document.getElementById('name-left')?.classList.add('show');
+    if (hasRight) document.getElementById('name-right')?.classList.add('show');
   }, 850);
 }
-  
 
-
-  // Kurz warten damit das Ausblenden abgeschlossen ist, dann beide gleichzeitig einblenden
-  setTimeout(() => {
-    if (dLeft)  updatePanel('left',  dLeft);
-    if (dRight) updatePanel('right', dRight);
-  }, 150);
 
 
 let revealInterval = null;
