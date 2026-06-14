@@ -461,49 +461,45 @@ function updatePanel(side, driver) {
   const panelTeam = document.getElementById(`team-${side}`);
   const panelLogo = document.getElementById(`logo-${side}`);
 
-  // Ausblenden
-  [portrait, panelName, panelPos, panelTeam, panelLogo].forEach(el => el.classList.remove('show'));
-  portrait.style.opacity = '';
-
+  // Daten setzen
   const { first, last } = splitName(driver.name);
   const color = teamColor(driver.team);
 
-  portrait.src       = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
-  logo.src           = TEAM_LOGOS[driver.team] || '';
-  team.textContent   = driver.team;
-  posNum.textContent = driver.position;
-  posSfx.textContent = ordinalSuffix(driver.position);
+  portrait.src          = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
+  portrait.style.opacity = '';
+  logo.src              = TEAM_LOGOS[driver.team] || '';
+  team.textContent      = driver.team;
+  posNum.textContent    = driver.position;
+  posSfx.textContent    = ordinalSuffix(driver.position);
   nameFirst.textContent = first;
   nameLast.textContent  = last.toUpperCase();
   nameLast.style.color  = color;
 
+  // Einblenden
   setTimeout(() => { portrait.classList.add('show'); panelTeam.classList.add('show'); }, 100);
   setTimeout(() => panelLogo.classList.add('show'), 400);
   setTimeout(() => panelPos.classList.add('show'),  550);
   setTimeout(() => panelName.classList.add('show'), 700);
 }
-
+  
 function showPanelDrivers(posOdd, posEven, drivers) {
   const dLeft  = drivers.find(d => d.position === posOdd  && d.assetKey && d.assetKey !== '') || null;
   const dRight = drivers.find(d => d.position === posEven && d.assetKey && d.assetKey !== '') || null;
 
-  if (!dLeft) {
-    ['portrait-left','team-left','logo-left'].forEach(id =>
-      document.getElementById(id)?.classList.remove('show'));
-    document.getElementById('pos-left')?.classList.remove('show');
-    document.getElementById('name-left')?.classList.remove('show');
-  } else {
-    updatePanel('left', dLeft);
-  }
+  // Beide Panels gleichzeitig ausblenden bevor neue Daten gesetzt werden
+  ['left', 'right'].forEach(side => {
+    document.getElementById(`portrait-${side}`)?.classList.remove('show');
+    document.getElementById(`team-${side}`)?.classList.remove('show');
+    document.getElementById(`logo-${side}`)?.classList.remove('show');
+    document.getElementById(`pos-${side}`)?.classList.remove('show');
+    document.getElementById(`name-${side}`)?.classList.remove('show');
+  });
 
-  if (!dRight) {
-    ['portrait-right','team-right','logo-right'].forEach(id =>
-      document.getElementById(id)?.classList.remove('show'));
-    document.getElementById('pos-right')?.classList.remove('show');
-    document.getElementById('name-right')?.classList.remove('show');
-  } else {
-    updatePanel('right', dRight);
-  }
+  // Kurz warten damit das Ausblenden abgeschlossen ist, dann beide gleichzeitig einblenden
+  setTimeout(() => {
+    if (dLeft)  updatePanel('left',  dLeft);
+    if (dRight) updatePanel('right', dRight);
+  }, 150);
 }
 
 let revealInterval = null;
