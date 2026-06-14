@@ -520,21 +520,20 @@ function startReveal(drivers) {
 
   const allSteps = [...backPairs, null, ...frontPairs];
 
-  // Leere Paare am Anfang überspringen – erstes Paar mit mind. 1 besetztem Fahrer finden
   function pairHasDriver(pair) {
-    if (!pair) return true; // Pause nie überspringen
+    if (!pair) return true;
     return pair.some(pos => {
       const d = drivers.find(d => d.position === pos);
       return d && d.assetKey && d.assetKey !== '';
     });
   }
 
-  // Alle leeren Paare vom Anfang entfernen
+  // Leere Paare am Anfang überspringen
   while (allSteps.length > 0 && allSteps[0] !== null && !pairHasDriver(allSteps[0])) {
     allSteps.shift();
   }
 
-  // Leere Slots (die übersprungenen) sofort ohne Animation zeigen
+  // Leere Slots sofort ohne Animation zeigen
   drivers.forEach(d => {
     if (!d.assetKey || d.assetKey === '') {
       const el = document.getElementById(`slot-p${d.position}`);
@@ -547,41 +546,45 @@ function startReveal(drivers) {
 
   if (allSteps.length === 0) return;
 
-  // Erstes Paar sofort zeigen
   const firstStep = allSteps.shift();
-  if (firstStep) {
-    firstStep.forEach(pos => {
-      const el = document.getElementById(`slot-p${pos}`);
-      if (el) el.classList.add('reveal');
-    });
-    const odd0  = firstStep[0] % 2 === 1 ? firstStep[0] : firstStep[1];
-    const even0 = firstStep[0] % 2 === 0 ? firstStep[0] : firstStep[1];
-    showPanelDrivers(odd0, even0, drivers);
-    currentFeaturedPositions = [odd0, even0];
-  }
 
-  // Rest im Interval
-  let step = 0;
-  revealInterval = setInterval(() => {
-    if (step >= allSteps.length) {
-      clearInterval(revealInterval);
-      revealInterval = null;
-      return;
+  // Erstes Paar nach 300ms zeigen
+  setTimeout(() => {
+    if (firstStep) {
+      firstStep.forEach(pos => {
+        const el = document.getElementById(`slot-p${pos}`);
+        if (el) el.classList.add('reveal');
+      });
+      const odd0  = firstStep[0] % 2 === 1 ? firstStep[0] : firstStep[1];
+      const even0 = firstStep[0] % 2 === 0 ? firstStep[0] : firstStep[1];
+      showPanelDrivers(odd0, even0, drivers);
+      currentFeaturedPositions = [odd0, even0];
     }
 
-    const pair = allSteps[step++];
-    if (pair === null) return;
+    // Rest nach weiteren 2000ms starten
+    let step = 0;
+    revealInterval = setInterval(() => {
+      if (step >= allSteps.length) {
+        clearInterval(revealInterval);
+        revealInterval = null;
+        return;
+      }
 
-    pair.forEach(pos => {
-      const el = document.getElementById(`slot-p${pos}`);
-      if (el) el.classList.add('reveal');
-    });
+      const pair = allSteps[step++];
+      if (pair === null) return;
 
-    const odd  = pair[0] % 2 === 1 ? pair[0] : pair[1];
-    const even = pair[0] % 2 === 0 ? pair[0] : pair[1];
-    currentFeaturedPositions = [odd, even];
-    showPanelDrivers(odd, even, drivers);
-  }, 2000);
+      pair.forEach(pos => {
+        const el = document.getElementById(`slot-p${pos}`);
+        if (el) el.classList.add('reveal');
+      });
+
+      const odd  = pair[0] % 2 === 1 ? pair[0] : pair[1];
+      const even = pair[0] % 2 === 0 ? pair[0] : pair[1];
+      currentFeaturedPositions = [odd, even];
+      showPanelDrivers(odd, even, drivers);
+    }, 2000);
+
+  }, 300);
 }
 
 function restartOverlay(data) {
@@ -599,7 +602,7 @@ function restartOverlay(data) {
   document.querySelectorAll('.slot').forEach(el => el.classList.remove('reveal'));
 
   buildSlots(data.drivers);
-  setTimeout(() => startReveal(data.drivers), 1200);
+  setTimeout(() => startReveal(data.drivers), 500);
 }
 
 let lastReplayAt = null;
@@ -622,7 +625,7 @@ async function init() {
     const data = await res.json();
     lastReplayAt = data.replayAt || null;
     buildSlots(data.drivers);
-    setTimeout(() => startReveal(data.drivers), 800);
+    setTimeout(() => startReveal(data.drivers), 300);
   } catch(e) { console.error('Init:', e); }
 }
 
