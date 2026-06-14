@@ -461,25 +461,53 @@ function updatePanel(side, driver) {
   const panelTeam = document.getElementById(`team-${side}`);
   const panelLogo = document.getElementById(`logo-${side}`);
 
-  // Daten setzen
   const { first, last } = splitName(driver.name);
   const color = teamColor(driver.team);
 
-  portrait.src          = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
+  portrait.src           = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
   portrait.style.opacity = '';
-  logo.src              = TEAM_LOGOS[driver.team] || '';
-  team.textContent      = driver.team;
-  posNum.textContent    = driver.position;
-  posSfx.textContent    = ordinalSuffix(driver.position);
-  nameFirst.textContent = first;
-  nameLast.textContent  = last.toUpperCase();
-  nameLast.style.color  = color;
+  logo.src               = TEAM_LOGOS[driver.team] || '';
+  team.textContent       = driver.team;
+  posNum.textContent     = driver.position;
+  posSfx.textContent     = ordinalSuffix(driver.position);
+  nameFirst.textContent  = first;
+  nameLast.textContent   = last.toUpperCase();
+  nameLast.style.color   = color;
+  // Kein setTimeout hier – wird von showPanelDrivers gesteuert
+}
 
-  // Einblenden
-  setTimeout(() => { portrait.classList.add('show'); panelTeam.classList.add('show'); }, 100);
-  setTimeout(() => panelLogo.classList.add('show'), 400);
-  setTimeout(() => panelPos.classList.add('show'),  550);
-  setTimeout(() => panelName.classList.add('show'), 700);
+function showPanelDrivers(posOdd, posEven, drivers) {
+  const dLeft  = drivers.find(d => d.position === posOdd  && d.assetKey && d.assetKey !== '') || null;
+  const dRight = drivers.find(d => d.position === posEven && d.assetKey && d.assetKey !== '') || null;
+
+  // Beide gleichzeitig ausblenden
+  ['left', 'right'].forEach(side => {
+    ['portrait','team','logo','pos','name'].forEach(el => {
+      document.getElementById(el === 'pos' ? `pos-${side}` : el === 'name' ? `name-${side}` : `${el}-${side}`)?.classList.remove('show');
+    });
+  });
+
+  // Daten beider Panels sofort setzen
+  if (dLeft)  updatePanel('left',  dLeft);
+  if (dRight) updatePanel('right', dRight);
+
+  // Beide gleichzeitig einblenden mit gleichen Timings
+  setTimeout(() => {
+    if (dLeft)  { document.getElementById('portrait-left')?.classList.add('show');  document.getElementById('team-left')?.classList.add('show'); }
+    if (dRight) { document.getElementById('portrait-right')?.classList.add('show'); document.getElementById('team-right')?.classList.add('show'); }
+  }, 250);
+  setTimeout(() => {
+    if (dLeft)  document.getElementById('logo-left')?.classList.add('show');
+    if (dRight) document.getElementById('logo-right')?.classList.add('show');
+  }, 550);
+  setTimeout(() => {
+    if (dLeft)  document.getElementById('pos-left')?.classList.add('show');
+    if (dRight) document.getElementById('pos-right')?.classList.add('show');
+  }, 700);
+  setTimeout(() => {
+    if (dLeft)  document.getElementById('name-left')?.classList.add('show');
+    if (dRight) document.getElementById('name-right')?.classList.add('show');
+  }, 850);
 }
   
 function showPanelDrivers(posOdd, posEven, drivers) {
