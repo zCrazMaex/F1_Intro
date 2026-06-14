@@ -405,7 +405,6 @@ const TEAM_COLORS = {
 function driverCode(key) {
   const driver = ALL_DRIVERS.find(d => d.assetKey === key);
   if (driver) {
-    // Nachname nehmen, erste 3 Buchstaben
     const parts = driver.name.trim().split(' ');
     return parts[parts.length - 1].slice(0, 3).toUpperCase();
   }
