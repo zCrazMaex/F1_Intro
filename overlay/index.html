@@ -525,9 +525,16 @@ function startReveal(drivers) {
   }
 
   // Leere Paare am Anfang überspringen
-  while (allSteps.length > 0 && allSteps[0] !== null && !pairHasDriver(allSteps[0])) {
-    allSteps.shift();
+  // Leere Paare am Anfang UND die null-Pause wenn sie am Anfang steht überspringen
+while (allSteps.length > 0) {
+  if (allSteps[0] === null) {
+    allSteps.shift(); // null am Anfang entfernen
+  } else if (!pairHasDriver(allSteps[0])) {
+    allSteps.shift(); // leeres Paar entfernen
+  } else {
+    break; // erstes Paar mit Fahrer gefunden
   }
+}
 
   // Leere Slots sofort ohne Animation zeigen
   drivers.forEach(d => {
