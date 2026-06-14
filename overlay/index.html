@@ -202,25 +202,33 @@ function buildSlots(drivers) {
 }
 
 // ── PANEL DATEN SETZEN (kein setTimeout) ──
-function setPanel(side, driver) {
-  document.getElementById(`portrait-${side}`).src          = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
-  document.getElementById(`logo-${side}`).src              = TEAM_LOGOS[driver.team] || '';
-  document.getElementById(`team-${side}`).textContent      = driver.team;
-  document.getElementById(`pos-${side}-num`).textContent   = driver.position;
-  document.getElementById(`pos-${side}-sfx`).textContent   = ordinalSuffix(driver.position);
-  const { first, last } = splitName(driver.name);
-  document.getElementById(`name-${side}-first`).textContent = first;
-  document.getElementById(`name-${side}-last`).textContent  = last.toUpperCase();
-  document.getElementById(`name-${side}-last`).style.color  = teamColor(driver.team);
-}
+function hidePanels() {
+  ['left', 'right'].forEach(side => {
+    // Transition deaktivieren damit das Ausblenden sofort passiert
+    const portrait = document.getElementById(`portrait-${side}`);
+    portrait.style.transition = 'none';
+    portrait.style.opacity = '0';
+    portrait.classList.remove('show');
 
+    document.getElementById(`team-${side}`)?.classList.remove('show');
+    document.getElementById(`logo-${side}`)?.classList.remove('show');
+    document.getElementById(`pos-${side}`)?.classList.remove('show');
+    document.getElementById(`name-${side}`)?.classList.remove('show');
+  });
+}
 // ── PANELS EIN/AUSBLENDEN ──
 function hidePanels() {
   ['left', 'right'].forEach(side => {
-    ['portrait', 'team', 'logo', 'pos', 'name'].forEach(el => {
-      const id = (el === 'pos' || el === 'name') ? `${el}-${side}` : `${el}-${side}`;
-      document.getElementById(id)?.classList.remove('show');
-    });
+    // Transition deaktivieren damit das Ausblenden sofort passiert
+    const portrait = document.getElementById(`portrait-${side}`);
+    portrait.style.transition = 'none';
+    portrait.style.opacity = '0';
+    portrait.classList.remove('show');
+
+    document.getElementById(`team-${side}`)?.classList.remove('show');
+    document.getElementById(`logo-${side}`)?.classList.remove('show');
+    document.getElementById(`pos-${side}`)?.classList.remove('show');
+    document.getElementById(`name-${side}`)?.classList.remove('show');
   });
 }
 
