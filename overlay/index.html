@@ -510,18 +510,7 @@ function showPanelDrivers(posOdd, posEven, drivers) {
   }, 850);
 }
   
-function showPanelDrivers(posOdd, posEven, drivers) {
-  const dLeft  = drivers.find(d => d.position === posOdd  && d.assetKey && d.assetKey !== '') || null;
-  const dRight = drivers.find(d => d.position === posEven && d.assetKey && d.assetKey !== '') || null;
 
-  // Beide Panels gleichzeitig ausblenden bevor neue Daten gesetzt werden
-  ['left', 'right'].forEach(side => {
-    document.getElementById(`portrait-${side}`)?.classList.remove('show');
-    document.getElementById(`team-${side}`)?.classList.remove('show');
-    document.getElementById(`logo-${side}`)?.classList.remove('show');
-    document.getElementById(`pos-${side}`)?.classList.remove('show');
-    document.getElementById(`name-${side}`)?.classList.remove('show');
-  });
 
   // Kurz warten damit das Ausblenden abgeschlossen ist, dann beide gleichzeitig einblenden
   setTimeout(() => {
