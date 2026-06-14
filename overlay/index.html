@@ -7,310 +7,76 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Barlow:wght@400;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 1920px; height: 1080px; background: transparent; overflow: hidden; font-family: 'Barlow Condensed', sans-serif; }
+    #scene { position: absolute; inset: 0; display: flex; background: #0c0c14; }
 
-    body {
-      width: 1920px;
-      height: 1080px;
-      background: transparent;
-      overflow: hidden;
-      font-family: 'Barlow Condensed', sans-serif;
-    }
+    .driver-panel { position: relative; width: 580px; height: 1080px; flex-shrink: 0; overflow: hidden; }
+    .driver-panel::before { content: ''; position: absolute; inset: 0; z-index: 2; background: repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(0,0,0,0.07) 8px, rgba(0,0,0,0.07) 9px); pointer-events: none; }
 
-    #scene {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      background: #0c0c14;
-    }
-
-    /* ── DRIVER PANELS ── */
-    .driver-panel {
-      position: relative;
-      width: 580px;
-      height: 1080px;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-
-    .driver-panel::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      background: repeating-linear-gradient(
-        -45deg, transparent, transparent 8px,
-        rgba(0,0,0,0.07) 8px, rgba(0,0,0,0.07) 9px
-      );
-      pointer-events: none;
-    }
-
-    .panel-portrait {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: top center;
-      opacity: 0;
-      transform: scale(1.04);
-      transition: opacity 1.2s ease, transform 2s ease;
-    }
+    .panel-portrait { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top center; opacity: 0; transform: scale(1.04); transition: opacity 1.2s ease, transform 2s ease; }
     .panel-portrait.show { opacity: 1; transform: scale(1); }
 
-    .panel-gradient-bottom {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 55%;
-      background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
-      z-index: 3;
-    }
-
-    .panel-gradient-inner {
-      position: absolute;
-      top: 0; bottom: 0;
-      width: 120px;
-      z-index: 3;
-    }
+    .panel-gradient-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 55%; background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 60%, transparent 100%); z-index: 3; }
+    .panel-gradient-inner { position: absolute; top: 0; bottom: 0; width: 120px; z-index: 3; }
     .panel-left  .panel-gradient-inner { right: 0; background: linear-gradient(to left,  rgba(10,10,18,0.85) 0%, transparent 100%); }
     .panel-right .panel-gradient-inner { left:  0; background: linear-gradient(to right, rgba(10,10,18,0.85) 0%, transparent 100%); }
 
-    .team-vertical {
-      position: absolute;
-      top: 50%;
-      z-index: 5;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.22);
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity 1s ease 0.6s;
-    }
+    .team-vertical { position: absolute; top: 50%; z-index: 5; font-size: 13px; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,0.22); white-space: nowrap; opacity: 0; transition: opacity 1s ease 0.6s; }
     .panel-left  .team-vertical { right: 18px; transform: translateY(-50%) rotate(90deg); }
     .panel-right .team-vertical { left:  18px; transform: translateY(-50%) rotate(-90deg); }
     .team-vertical.show { opacity: 1; }
 
-    .team-logo-corner {
-      position: absolute;
-      bottom: 220px;
-      z-index: 6;
-      width: 90px;
-      height: 90px;
-      object-fit: contain;
-      opacity: 0;
-      transition: opacity 0.8s ease 1s;
-    }
+    .team-logo-corner { position: absolute; bottom: 220px; z-index: 6; width: 90px; height: 90px; object-fit: contain; opacity: 0; transition: opacity 0.8s ease 1s; }
     .panel-left  .team-logo-corner { right: 40px; }
     .panel-right .team-logo-corner { left:  40px; }
     .team-logo-corner.show { opacity: 1; }
 
-    .panel-position {
-      position: absolute;
-      z-index: 6;
-      bottom: 200px;
-      font-weight: 900;
-      line-height: 1;
-      opacity: 0;
-      transition: opacity 0.6s ease 0.8s, transform 0.6s ease 0.8s;
-      transform: translateY(20px);
-    }
+    .panel-position { position: absolute; z-index: 6; bottom: 200px; font-weight: 900; line-height: 1; opacity: 0; transition: opacity 0.6s ease, transform 0.6s ease; transform: translateY(20px); }
     .panel-left  .panel-position { left: 50px; }
     .panel-right .panel-position { right: 50px; text-align: right; }
     .panel-position.show { opacity: 1; transform: translateY(0); }
 
-    .pos-ordinal {
-      font-size: 72px;
-      color: #ffffff;
-      display: inline-block;
-      line-height: 1;
-    }
-    .pos-suffix {
-      font-size: 32px;
-      color: rgba(255,255,255,0.7);
-      vertical-align: super;
-      margin-left: 2px;
-    }
+    .pos-ordinal { font-size: 72px; color: #ffffff; display: inline-block; line-height: 1; }
+    .pos-suffix  { font-size: 32px; color: rgba(255,255,255,0.7); vertical-align: super; margin-left: 2px; }
 
-    .panel-name {
-      position: absolute;
-      bottom: 80px;
-      z-index: 6;
-      opacity: 0;
-      transition: opacity 0.7s ease 1s, transform 0.7s ease 1s;
-      transform: translateY(16px);
-    }
+    .panel-name { position: absolute; bottom: 80px; z-index: 6; opacity: 0; transition: opacity 0.7s ease, transform 0.7s ease; transform: translateY(16px); }
     .panel-left  .panel-name { left: 0; right: 0; padding: 0 40px; }
     .panel-right .panel-name { left: 0; right: 0; padding: 0 40px; text-align: right; }
     .panel-name.show { opacity: 1; transform: translateY(0); }
 
-    .name-first {
-      font-style: italic;
-      font-size: 28px;
-      font-weight: 400;
-      color: rgba(255,255,255,0.7);
-      letter-spacing: 1px;
-      display: block;
-      margin-bottom: 2px;
-    }
-    .name-last {
-      font-size: 68px;
-      font-weight: 900;
-      line-height: 0.9;
-      letter-spacing: -1px;
-      display: block;
-      text-transform: uppercase;
-    }
+    .name-first { font-style: italic; font-size: 28px; font-weight: 400; color: rgba(255,255,255,0.7); letter-spacing: 1px; display: block; margin-bottom: 2px; }
+    .name-last  { font-size: 68px; font-weight: 900; line-height: 0.9; letter-spacing: -1px; display: block; text-transform: uppercase; }
 
-    /* ── CENTER ── */
-    #center {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      z-index: 10;
-    }
+    #center { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 10; }
 
-    #f1-logo {
-      margin-top: 30px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      opacity: 0;
-      transition: opacity 0.6s ease;
-      position: relative;
-      z-index: 5;
-    }
+    #f1-logo { margin-top: 30px; display: flex; align-items: center; gap: 10px; opacity: 0; transition: opacity 0.6s ease; position: relative; z-index: 5; }
     #f1-logo.show { opacity: 1; }
-    #f1-logo-bar { width: 4px; height: 40px; background: #e10600; }
+    #f1-logo-bar  { width: 4px; height: 40px; background: #e10600; }
     #f1-logo-text { font-size: 16px; letter-spacing: 5px; color: rgba(255,255,255,0.7); text-transform: uppercase; }
 
-    /* Red center line */
-    #center-line {
-      position: absolute;
-      top: 0; bottom: 0;
-      left: 50%;
-      width: 3px;
-      background: linear-gradient(to bottom, transparent 0%, #e10600 15%, #e10600 85%, transparent 100%);
-      transform: translateX(-50%);
-      z-index: 1;
-    }
+    #center-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: linear-gradient(to bottom, transparent 0%, #e10600 15%, #e10600 85%, transparent 100%); transform: translateX(-50%); z-index: 1; }
 
-    /* Starting Grid label */
-    #starting-grid-label {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(90deg);
-      font-size: 16px;
-      letter-spacing: 6px;
-      color: rgba(255,255,255,0.9);
-      text-transform: uppercase;
-      white-space: nowrap;
-      z-index: 4;
-      background: #0c0c14;
-      padding: 6px 14px;
-    }
+    #starting-grid-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); font-size: 16px; letter-spacing: 6px; color: rgba(255,255,255,0.9); text-transform: uppercase; white-space: nowrap; z-index: 4; background: #0c0c14; padding: 6px 14px; }
 
-    /* ── SLOTS ── */
-    /* Linke Spalte (ungerade P1,P3...): weiter weg + höher */
-    #slots-left {
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      top: 55px;
-      bottom: 75px;
-      right: calc(50% + 90px);
-      align-items: flex-end;
-    }
+    #slots-left  { position: absolute; display: flex; flex-direction: column; justify-content: space-between; top: 55px;  bottom: 75px; right: calc(50% + 90px); align-items: flex-end; }
+    #slots-right { position: absolute; display: flex; flex-direction: column; justify-content: space-between; top: 105px; bottom: 25px; left:  calc(50% + 90px); align-items: flex-start; }
 
-    /* Rechte Spalte (gerade P2,P4...): weiter weg + tiefer */
-    #slots-right {
-      position: absolute;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      top: 105px;
-      bottom: 25px;
-      left: calc(50% + 90px);
-      align-items: flex-start;
-    }
-
-    .slot {
-      height: 52px;
-      width: 210px;
-      display: flex;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.35s ease, transform 0.35s ease;
-    }
-    #slots-left  .slot { transform: translateX(12px); flex-direction: row-reverse; }
+    .slot { height: 52px; width: 210px; display: flex; align-items: center; opacity: 0; transition: opacity 0.35s ease, transform 0.35s ease; }
+    #slots-left  .slot { transform: translateX(12px);  flex-direction: row-reverse; }
     #slots-right .slot { transform: translateX(-12px); }
     .slot.reveal { opacity: 1; transform: translateX(0) !important; }
 
-    .slot-pos {
-      width: 36px;
-      height: 52px;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.12);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      font-weight: 700;
-      color: rgba(255,255,255,0.6);
-      flex-shrink: 0;
-    }
+    .slot-pos       { width: 36px; height: 52px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.6); flex-shrink: 0; }
+    .slot-team-logo { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; margin: 0 5px; }
+    .slot-name      { font-size: 20px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 0 8px; height: 52px; display: flex; align-items: center; flex: 1; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08); }
 
-    .slot-team-logo {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-      flex-shrink: 0;
-      margin: 0 5px;
-    }
-
-    .slot-name {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 0 8px;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      flex: 1;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-
-    /* Race label */
-    #race-label {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      z-index: 20;
-      opacity: 0;
-      transition: opacity 0.8s ease;
-      white-space: nowrap;
-    }
+    #race-label { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 20; opacity: 0; transition: opacity 0.8s ease; white-space: nowrap; }
     #race-label.show { opacity: 1; }
-    #race-label-name {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.8);
-      text-transform: uppercase;
-    }
+    #race-label-name { font-size: 22px; font-weight: 900; letter-spacing: 3px; color: rgba(255,255,255,0.8); text-transform: uppercase; }
   </style>
 </head>
 <body>
 <div id="scene">
-
   <div class="driver-panel panel-left" id="panel-left">
     <img class="panel-portrait" id="portrait-left" src="" alt="">
     <div class="panel-gradient-bottom"></div>
@@ -322,7 +88,7 @@
     </div>
     <div class="panel-name" id="name-left">
       <span class="name-first" id="name-left-first"></span>
-      <span class="name-last" id="name-left-last" style="color:#fff">—</span>
+      <span class="name-last"  id="name-left-last" style="color:#fff">—</span>
     </div>
   </div>
 
@@ -335,9 +101,7 @@
     </div>
     <div id="slots-left"></div>
     <div id="slots-right"></div>
-    <div id="race-label">
-      <div id="race-label-name">Grand Prix</div>
-    </div>
+    <div id="race-label"><div id="race-label-name">Grand Prix</div></div>
   </div>
 
   <div class="driver-panel panel-right" id="panel-right">
@@ -351,14 +115,14 @@
     </div>
     <div class="panel-name" id="name-right">
       <span class="name-first" id="name-right-first"></span>
-      <span class="name-last" id="name-right-last" style="color:#fff">—</span>
+      <span class="name-last"  id="name-right-last" style="color:#fff">—</span>
     </div>
   </div>
-
 </div>
+
 <script>
-const API_URL        = 'https://f1-intro-api.onrender.com';
-const GITHUB_RAW     = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
+const API_URL          = 'https://f1-intro-api.onrender.com';
+const GITHUB_RAW       = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
 const GITHUB_RAW_TEAMS = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/teams';
 
 let ALL_DRIVERS = [];
@@ -368,9 +132,7 @@ async function loadDriverPool() {
     const res  = await fetch(`${API_URL}/api/drivers`);
     const data = await res.json();
     ALL_DRIVERS = data.drivers || [];
-  } catch(e) {
-    console.error('Fahrer-Pool konnte nicht geladen werden:', e);
-  }
+  } catch(e) { console.error('Fahrer-Pool Fehler:', e); }
 }
 
 const TEAM_LOGOS = {
@@ -388,50 +150,42 @@ const TEAM_LOGOS = {
 };
 
 const TEAM_COLORS = {
-  'Red Bull Racing': '#3671C6',
-  'McLaren':         '#FF8000',
-  'Ferrari':         '#E8002D',
-  'Mercedes':        '#27F4D2',
-  'Aston Martin':    '#229971',
-  'Alpine':          '#FF87BC',
-  'Audi':            '#C92D4B',
-  'Williams':        '#64C4FF',
-  'VCARB':           '#6692FF',
-  'Haas':            '#B6BABD',
-  'Cadillac':        '#FFFFFF',
+  'Red Bull Racing': '#3671C6', 'McLaren': '#FF8000', 'Ferrari': '#E8002D',
+  'Mercedes': '#27F4D2', 'Aston Martin': '#229971', 'Alpine': '#FF87BC',
+  'Audi': '#C92D4B', 'Williams': '#64C4FF', 'VCARB': '#6692FF',
+  'Haas': '#B6BABD', 'Cadillac': '#FFFFFF',
 };
 
-// NEU – aus ALL_DRIVERS dynamisch ableiten:
+function teamColor(team)  { return TEAM_COLORS[team] || '#e10600'; }
+function ordinalSuffix(n) { return n===1?'ST':n===2?'ND':n===3?'RD':'TH'; }
+
+function splitName(full) {
+  const parts = full.trim().split(' ');
+  if (parts.length < 2) return { first: '', last: full };
+  const last = parts.pop();
+  return { first: parts.join(' '), last };
+}
+
 function driverCode(key) {
-  const driver = ALL_DRIVERS.find(d => d.assetKey === key);
-  if (driver) {
-    const parts = driver.name.trim().split(' ');
+  const d = ALL_DRIVERS.find(d => d.assetKey === key);
+  if (d) {
+    const parts = d.name.trim().split(' ');
     return parts[parts.length - 1].slice(0, 3).toUpperCase();
   }
   return key.slice(0, 3).toUpperCase();
 }
 
-function ordinalSuffix(n) {
-  if (n===1) return 'ST'; if (n===2) return 'ND'; if (n===3) return 'RD'; return 'TH';
-}
-function splitName(full) {
-  const parts = full.trim().split(' ');
-  if (parts.length < 2) return { first:'', last:full };
-  const last = parts.pop();
-  return { first: parts.join(' '), last };
-}
-function teamColor(team) { return TEAM_COLORS[team] || '#e10600'; }
-
+// ── SLOTS AUFBAUEN ──
 function buildSlots(drivers) {
   const slotL = document.getElementById('slots-left');
   const slotR = document.getElementById('slots-right');
   slotL.innerHTML = '';
   slotR.innerHTML = '';
 
-  [...drivers].sort((a,b) => a.position - b.position).forEach(d => {
-    const slot = document.createElement('div');
+  [...drivers].sort((a, b) => a.position - b.position).forEach(d => {
+    const slot    = document.createElement('div');
     slot.className = 'slot';
-    slot.id = `slot-p${d.position}`;
+    slot.id        = `slot-p${d.position}`;
 
     const isEmpty = !d.assetKey || d.assetKey === '';
     const color   = isEmpty ? 'transparent' : teamColor(d.team);
@@ -447,56 +201,30 @@ function buildSlots(drivers) {
   });
 }
 
-function updatePanel(side, driver) {
-  if (!driver) return;
-  const portrait  = document.getElementById(`portrait-${side}`);
-  const team      = document.getElementById(`team-${side}`);
-  const logo      = document.getElementById(`logo-${side}`);
-  const posNum    = document.getElementById(`pos-${side}-num`);
-  const posSfx    = document.getElementById(`pos-${side}-sfx`);
-  const nameFirst = document.getElementById(`name-${side}-first`);
-  const nameLast  = document.getElementById(`name-${side}-last`);
-  const panelName = document.getElementById(`name-${side}`);
-  const panelPos  = document.getElementById(`pos-${side}`);
-  const panelTeam = document.getElementById(`team-${side}`);
-  const panelLogo = document.getElementById(`logo-${side}`);
-
+// ── PANEL DATEN SETZEN (kein setTimeout) ──
+function setPanel(side, driver) {
+  document.getElementById(`portrait-${side}`).src          = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
+  document.getElementById(`logo-${side}`).src              = TEAM_LOGOS[driver.team] || '';
+  document.getElementById(`team-${side}`).textContent      = driver.team;
+  document.getElementById(`pos-${side}-num`).textContent   = driver.position;
+  document.getElementById(`pos-${side}-sfx`).textContent   = ordinalSuffix(driver.position);
   const { first, last } = splitName(driver.name);
-  const color = teamColor(driver.team);
-
-  portrait.src           = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
-  portrait.style.opacity = '';
-  logo.src               = TEAM_LOGOS[driver.team] || '';
-  team.textContent       = driver.team;
-  posNum.textContent     = driver.position;
-  posSfx.textContent     = ordinalSuffix(driver.position);
-  nameFirst.textContent  = first;
-  nameLast.textContent   = last.toUpperCase();
-  nameLast.style.color   = color;
-  // Kein setTimeout hier – wird von showPanelDrivers gesteuert
+  document.getElementById(`name-${side}-first`).textContent = first;
+  document.getElementById(`name-${side}-last`).textContent  = last.toUpperCase();
+  document.getElementById(`name-${side}-last`).style.color  = teamColor(driver.team);
 }
 
-function showPanelDrivers(posOdd, posEven, drivers) {
-  const dLeft  = drivers.find(d => d.position === posOdd  && d.assetKey && d.assetKey !== '') || null;
-  const dRight = drivers.find(d => d.position === posEven && d.assetKey && d.assetKey !== '') || null;
-
-  // Beide gleichzeitig ausblenden
+// ── PANELS EIN/AUSBLENDEN ──
+function hidePanels() {
   ['left', 'right'].forEach(side => {
-    document.getElementById(`portrait-${side}`)?.classList.remove('show');
-    document.getElementById(`team-${side}`)?.classList.remove('show');
-    document.getElementById(`logo-${side}`)?.classList.remove('show');
-    document.getElementById(`pos-${side}`)?.classList.remove('show');
-    document.getElementById(`name-${side}`)?.classList.remove('show');
+    ['portrait', 'team', 'logo', 'pos', 'name'].forEach(el => {
+      const id = (el === 'pos' || el === 'name') ? `${el}-${side}` : `${el}-${side}`;
+      document.getElementById(id)?.classList.remove('show');
+    });
   });
+}
 
-  // Daten sofort setzen
-  if (dLeft)  updatePanel('left',  dLeft);
-  if (dRight) updatePanel('right', dRight);
-
-  // Alle Timings mit lokalen Variablen die im Closure verfügbar sind
-  const hasLeft  = dLeft  !== null;
-  const hasRight = dRight !== null;
-
+function showPanels(hasLeft, hasRight) {
   setTimeout(() => {
     if (hasLeft)  { document.getElementById('portrait-left')?.classList.add('show');  document.getElementById('team-left')?.classList.add('show'); }
     if (hasRight) { document.getElementById('portrait-right')?.classList.add('show'); document.getElementById('team-right')?.classList.add('show'); }
@@ -515,8 +243,19 @@ function showPanelDrivers(posOdd, posEven, drivers) {
   }, 850);
 }
 
+function showPanelDrivers(posOdd, posEven, drivers) {
+  const dLeft  = drivers.find(d => d.position === posOdd  && d.assetKey && d.assetKey !== '') || null;
+  const dRight = drivers.find(d => d.position === posEven && d.assetKey && d.assetKey !== '') || null;
 
+  hidePanels();
 
+  if (dLeft)  setPanel('left',  dLeft);
+  if (dRight) setPanel('right', dRight);
+
+  showPanels(dLeft !== null, dRight !== null);
+}
+
+// ── REVEAL ANIMATION ──
 let revealInterval = null;
 let currentFeaturedPositions = [];
 
@@ -532,54 +271,48 @@ function startReveal(drivers) {
   const allSteps = [...backPairs, null, ...frontPairs];
 
   function pairHasDriver(pair) {
-    if (!pair) return true;
     return pair.some(pos => {
       const d = drivers.find(d => d.position === pos);
       return d && d.assetKey && d.assetKey !== '';
     });
   }
 
-  // Leere Paare am Anfang überspringen
-  // Leere Paare am Anfang UND die null-Pause wenn sie am Anfang steht überspringen
-while (allSteps.length > 0) {
-  if (allSteps[0] === null) {
-    allSteps.shift(); // null am Anfang entfernen
-  } else if (!pairHasDriver(allSteps[0])) {
-    allSteps.shift(); // leeres Paar entfernen
-  } else {
-    break; // erstes Paar mit Fahrer gefunden
+  // Leere Paare und null am Anfang überspringen
+  while (allSteps.length > 0) {
+    if (allSteps[0] === null || !pairHasDriver(allSteps[0])) {
+      allSteps.shift();
+    } else {
+      break;
+    }
   }
-}
 
-  // Leere Slots sofort ohne Animation zeigen
+  // Leere Slots sofort zeigen
   drivers.forEach(d => {
     if (!d.assetKey || d.assetKey === '') {
       const el = document.getElementById(`slot-p${d.position}`);
-      if (el) {
-        el.style.transition = 'none';
-        el.classList.add('reveal');
-      }
+      if (el) { el.style.transition = 'none'; el.classList.add('reveal'); }
     }
   });
 
   if (allSteps.length === 0) return;
 
+  function revealPair(pair) {
+    pair.forEach(pos => {
+      const el = document.getElementById(`slot-p${pos}`);
+      if (el) el.classList.add('reveal');
+    });
+    const odd  = pair[0] % 2 === 1 ? pair[0] : pair[1];
+    const even = pair[0] % 2 === 0 ? pair[0] : pair[1];
+    currentFeaturedPositions = [odd, even];
+    showPanelDrivers(odd, even, drivers);
+  }
+
+  // Erstes Paar nach 300ms
   const firstStep = allSteps.shift();
-
-  // Erstes Paar nach 300ms zeigen
   setTimeout(() => {
-    if (firstStep) {
-      firstStep.forEach(pos => {
-        const el = document.getElementById(`slot-p${pos}`);
-        if (el) el.classList.add('reveal');
-      });
-      const odd0  = firstStep[0] % 2 === 1 ? firstStep[0] : firstStep[1];
-      const even0 = firstStep[0] % 2 === 0 ? firstStep[0] : firstStep[1];
-      showPanelDrivers(odd0, even0, drivers);
-      currentFeaturedPositions = [odd0, even0];
-    }
+    revealPair(firstStep);
 
-    // Rest nach weiteren 2000ms starten
+    // Rest alle 2000ms
     let step = 0;
     revealInterval = setInterval(() => {
       if (step >= allSteps.length) {
@@ -587,34 +320,18 @@ while (allSteps.length > 0) {
         revealInterval = null;
         return;
       }
-
       const pair = allSteps[step++];
       if (pair === null) return;
-
-      pair.forEach(pos => {
-        const el = document.getElementById(`slot-p${pos}`);
-        if (el) el.classList.add('reveal');
-      });
-
-      const odd  = pair[0] % 2 === 1 ? pair[0] : pair[1];
-      const even = pair[0] % 2 === 0 ? pair[0] : pair[1];
-      currentFeaturedPositions = [odd, even];
-      showPanelDrivers(odd, even, drivers);
+      revealPair(pair);
     }, 2000);
-
   }, 300);
 }
 
+// ── RESTART ──
 function restartOverlay(data) {
   if (revealInterval) { clearInterval(revealInterval); revealInterval = null; }
 
-  ['left','right'].forEach(side => {
-    ['portrait-','team-','logo-'].forEach(prefix => {
-      document.getElementById(`${prefix}${side}`)?.classList.remove('show');
-    });
-    document.getElementById(`pos-${side}`)?.classList.remove('show');
-    document.getElementById(`name-${side}`)?.classList.remove('show');
-  });
+  hidePanels();
   document.getElementById('f1-logo').classList.remove('show');
   document.getElementById('race-label').classList.remove('show');
   document.querySelectorAll('.slot').forEach(el => el.classList.remove('reveal'));
@@ -623,6 +340,7 @@ function restartOverlay(data) {
   setTimeout(() => startReveal(data.drivers), 500);
 }
 
+// ── POLLING ──
 let lastReplayAt = null;
 
 async function checkForUpdates() {
@@ -636,6 +354,7 @@ async function checkForUpdates() {
   } catch(e) { console.error(e); }
 }
 
+// ── INIT ──
 async function init() {
   try {
     await loadDriverPool();
