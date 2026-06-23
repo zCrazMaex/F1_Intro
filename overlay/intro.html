@@ -321,10 +321,22 @@ function showDriver(driver, index, total) {
   nextVid.oncanplay = doTransition;
 
   nextVid.onerror = () => {
-    console.warn(`Kein Video für ${driver.assetKey}, überspringe...`);
-    queueIndex++;
-    if (queueIndex < driverQueue.length) {
-      setTimeout(() => showDriver(driverQueue[queueIndex], queueIndex, driverQueue.length), 300);
+    if (nextVid.src.indexOf('/videos/reserve1.mp4') === -1) {
+      console.warn(`Kein Video für ${driver.assetKey}, nutze Fallback...`);
+      nextVid.onerror = () => {
+        console.warn('Auch Fallback-Video nicht gefunden, überspringe...');
+        queueIndex++;
+        if (queueIndex < driverQueue.length) {
+          setTimeout(() => showDriver(driverQueue[queueIndex], queueIndex, driverQueue.length), 300);
+        }
+      };
+      nextVid.src = '/videos/reserve1.mp4';
+      nextVid.load();
+    } else {
+      queueIndex++;
+      if (queueIndex < driverQueue.length) {
+        setTimeout(() => showDriver(driverQueue[queueIndex], queueIndex, driverQueue.length), 300);
+      }
     }
   };
 }
