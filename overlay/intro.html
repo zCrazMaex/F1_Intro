@@ -147,6 +147,7 @@
 
 <video id="video-a" muted playsinline></video>
 <video id="video-b" muted playsinline></video>
+<audio id="bg-music" loop></audio>
 
 <div id="vignette"></div>
 <div id="texture"></div>
@@ -309,6 +310,10 @@ function showDriver(driver, index, total) {
       queueIndex++;
       if (queueIndex < driverQueue.length) {
         showDriver(driverQueue[queueIndex], queueIndex, driverQueue.length);
+      } else {
+        const music = document.getElementById('bg-music');
+        music.pause();
+        music.currentTime = 0;
       }
     };
   }
@@ -332,6 +337,11 @@ function startIntro(data) {
   videoB.classList.remove('active');
   videoA.src = '';
   videoB.src = '';
+
+  const music = document.getElementById('bg-music');
+  music.src = '/audio/intro-music.mp3';
+  music.currentTime = 0;
+  music.play().catch(e => console.warn('Musik Play:', e));
 
   if (driverQueue.length > 0) {
     showDriver(driverQueue[0], 0, driverQueue.length);
