@@ -120,7 +120,7 @@
   </div>
 </div>
 
-<audio id="grid-music"></audio>
+<audio id="starting-starting-grid-music"></audio>
 
 <script>
 const API_URL          = 'https://f1-intro-api.onrender.com';
@@ -320,8 +320,8 @@ function startReveal(drivers) {
   const firstStep = allSteps.shift();
   setTimeout(() => {
     // Musik starten beim ersten Paar
-    const music = document.getElementById('grid-music');
-    music.src = '/audio/grid-music.mp3';
+    const music = document.getElementById('starting-grid-music');
+    music.src = '/audio/starting-grid-music.mp3';
     music.loop = false;
     music.currentTime = 0;
     music.play().catch(e => console.warn('Musik Play:', e));
@@ -348,7 +348,7 @@ function restartOverlay(data) {
   if (revealInterval) { clearInterval(revealInterval); revealInterval = null; }
 
   // Musik stoppen
-  const music = document.getElementById('grid-music');
+  const music = document.getElementById('starting-grid-music');
   music.pause();
   music.currentTime = 0;
 
