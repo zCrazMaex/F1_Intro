@@ -120,6 +120,8 @@
   </div>
 </div>
 
+<audio id="grid-music"></audio>
+
 <script>
 const API_URL          = 'https://f1-intro-api.onrender.com';
 const GITHUB_RAW       = 'https://raw.githubusercontent.com/zCrazMaex/F1_Intro/main/assets/drivers';
@@ -314,8 +316,16 @@ function startReveal(drivers) {
   }
 
   // Erstes Paar nach 300ms
+  // Erstes Paar nach 300ms
   const firstStep = allSteps.shift();
   setTimeout(() => {
+    // Musik starten beim ersten Paar
+    const music = document.getElementById('grid-music');
+    music.src = '/audio/grid-music.mp3';
+    music.loop = false;
+    music.currentTime = 0;
+    music.play().catch(e => console.warn('Musik Play:', e));
+
     revealPair(firstStep);
 
     // Rest alle 2000ms
@@ -336,6 +346,11 @@ function startReveal(drivers) {
 // ── RESTART ──
 function restartOverlay(data) {
   if (revealInterval) { clearInterval(revealInterval); revealInterval = null; }
+
+  // Musik stoppen
+  const music = document.getElementById('grid-music');
+  music.pause();
+  music.currentTime = 0;
 
   hidePanels();
   document.getElementById('f1-logo').classList.remove('show');
