@@ -203,7 +203,7 @@ function buildSlots(drivers) {
   });
 }
 
-function hidePanels() {
+  function hidePanels() {
   ['left', 'right'].forEach(side => {
     const portrait = document.getElementById(`portrait-${side}`);
     portrait.style.transition = 'none';
@@ -214,7 +214,7 @@ function hidePanels() {
     document.getElementById(`pos-${side}`)?.classList.remove('show');
     document.getElementById(`name-${side}`)?.classList.remove('show');
   });
-}
+  
 
 // ── PANEL DATEN SETZEN ──
 // Bilder liegen flach unter assets/drivers/<assetKey>.png (kein Unterordner)
@@ -240,23 +240,18 @@ function setPanel(side, driver) {
   document.getElementById(`name-${side}-last`).style.color  = teamColor(driver.team);
 }
 
-function showPanels(hasLeft, hasRight) {
+function showPanelDrivers(posOdd, posEven, drivers) {
+  const dLeft  = drivers.find(d => d.position === posOdd  && d.assetKey && d.assetKey !== '') || null;
+  const dRight = drivers.find(d => d.position === posEven && d.assetKey && d.assetKey !== '') || null;
+
+  hidePanels();
+
+  // Erst NACH dem Ausblenden das neue src setzen (verzögert, damit Browser das alte Bild nicht mehr zeigt)
   setTimeout(() => {
-    if (hasLeft)  { document.getElementById('portrait-left')?.classList.add('show');  document.getElementById('team-left')?.classList.add('show'); }
-    if (hasRight) { document.getElementById('portrait-right')?.classList.add('show'); document.getElementById('team-right')?.classList.add('show'); }
-  }, 250);
-  setTimeout(() => {
-    if (hasLeft)  document.getElementById('logo-left')?.classList.add('show');
-    if (hasRight) document.getElementById('logo-right')?.classList.add('show');
-  }, 550);
-  setTimeout(() => {
-    if (hasLeft)  document.getElementById('pos-left')?.classList.add('show');
-    if (hasRight) document.getElementById('pos-right')?.classList.add('show');
-  }, 700);
-  setTimeout(() => {
-    if (hasLeft)  document.getElementById('name-left')?.classList.add('show');
-    if (hasRight) document.getElementById('name-right')?.classList.add('show');
-  }, 850);
+    if (dLeft)  setPanel('left',  dLeft);
+    if (dRight) setPanel('right', dRight);
+    showPanels(dLeft !== null, dRight !== null);
+  }, 750);
 }
 
 function showPanelDrivers(posOdd, posEven, drivers) {
