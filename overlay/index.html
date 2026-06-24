@@ -206,8 +206,8 @@ function buildSlots(drivers) {
 function hidePanels() {
   ['left', 'right'].forEach(side => {
     const portrait = document.getElementById(`portrait-${side}`);
-    portrait.style.transition = 'none';
-    portrait.style.opacity = '0';
+    // Transition wieder aktiv lassen damit es sauber ausfaded
+    portrait.style.transition = '';
     portrait.classList.remove('show');
     document.getElementById(`team-${side}`)?.classList.remove('show');
     document.getElementById(`logo-${side}`)?.classList.remove('show');
@@ -221,15 +221,8 @@ function hidePanels() {
 // Fallback: assets/drivers/reserve.png wenn das Fahrerbild fehlt
 function setPanel(side, driver) {
   const portrait = document.getElementById(`portrait-${side}`);
-  portrait.style.transition = '';
-  portrait.style.opacity    = '';
 
-  portrait.onerror = () => {
-    portrait.onerror = null;
-    portrait.src = `${GITHUB_RAW}/reserve.png`;
-  };
-  portrait.src = `${GITHUB_RAW}/${driver.assetKey}.png`;
-
+  // Daten für Text/Logo sofort setzen (werden erst später eingeblendet)
   document.getElementById(`logo-${side}`).src               = TEAM_LOGOS[driver.team] || '';
   document.getElementById(`team-${side}`).textContent       = driver.team;
   document.getElementById(`pos-${side}-num`).textContent    = driver.position;
@@ -238,6 +231,16 @@ function setPanel(side, driver) {
   document.getElementById(`name-${side}-first`).textContent = first;
   document.getElementById(`name-${side}-last`).textContent  = last.toUpperCase();
   document.getElementById(`name-${side}-last`).style.color  = teamColor(driver.team);
+
+  // Bild im Hintergrund vorladen, erst wenn fertig geladen → src setzen
+  const preloadImg = new Image();
+  preloadImg.onload = () => {
+    portrait.src = preloadImg.src;
+  };
+  preloadImg.onerror = () => {
+    portrait.src = `${GITHUB_RAW}/reserve.png`;
+  };
+  preloadImg.src = `${GITHUB_RAW}/${driver.assetKey}.png`;
 }
 
 function showPanels(hasLeft, hasRight) {
@@ -265,11 +268,16 @@ function showPanelDrivers(posOdd, posEven, drivers) {
 
   hidePanels();
 
+  // Warten bis die Ausblend-Transition (1.2s für Portrait) komplett fertig ist
   setTimeout(() => {
     if (dLeft)  setPanel('left',  dLeft);
     if (dRight) setPanel('right', dRight);
-    showPanels(dLeft !== null, dRight !== null);
-  }, 750);
+
+    // Noch etwas warten damit das neue Bild Zeit hat zu laden, bevor es einblendet
+    setTimeout(() => {
+      showPanels(dLeft !== null, dRight !== null);
+    }, 150);
+  }, 1200);
 }
 
 let revealInterval = null;
