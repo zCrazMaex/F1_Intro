@@ -178,7 +178,6 @@ function driverCode(key) {
   return key.slice(0, 3).toUpperCase();
 }
 
-// ── SLOTS AUFBAUEN ──
 function buildSlots(drivers) {
   const slotL = document.getElementById('slots-left');
   const slotR = document.getElementById('slots-right');
@@ -217,11 +216,20 @@ function hidePanels() {
   });
 }
 
+// ── PANEL DATEN SETZEN ──
+// Bilder liegen flach unter assets/drivers/<assetKey>.png (kein Unterordner)
+// Fallback: assets/drivers/reserve.png wenn das Fahrerbild fehlt
 function setPanel(side, driver) {
   const portrait = document.getElementById(`portrait-${side}`);
   portrait.style.transition = '';
   portrait.style.opacity    = '';
-  portrait.src = `${GITHUB_RAW}/${driver.assetKey}/portrait.png`;
+
+  portrait.onerror = () => {
+    portrait.onerror = null;
+    portrait.src = `${GITHUB_RAW}/reserve.png`;
+  };
+  portrait.src = `${GITHUB_RAW}/${driver.assetKey}.png`;
+
   document.getElementById(`logo-${side}`).src               = TEAM_LOGOS[driver.team] || '';
   document.getElementById(`team-${side}`).textContent       = driver.team;
   document.getElementById(`pos-${side}-num`).textContent    = driver.position;
@@ -257,8 +265,6 @@ function showPanelDrivers(posOdd, posEven, drivers) {
 
   hidePanels();
 
-  // Warten bis die Ausblend-Transition (0.7s für Name, 0.6s für Position) fertig ist,
-  // BEVOR neue Daten gesetzt werden
   setTimeout(() => {
     if (dLeft)  setPanel('left',  dLeft);
     if (dRight) setPanel('right', dRight);
@@ -266,7 +272,6 @@ function showPanelDrivers(posOdd, posEven, drivers) {
   }, 750);
 }
 
-// ── REVEAL ANIMATION ──
 let revealInterval = null;
 let currentFeaturedPositions = [];
 
@@ -288,7 +293,6 @@ function startReveal(drivers) {
     });
   }
 
-  // Leere Paare und null am Anfang überspringen
   while (allSteps.length > 0) {
     if (allSteps[0] === null || !pairHasDriver(allSteps[0])) {
       allSteps.shift();
@@ -297,7 +301,6 @@ function startReveal(drivers) {
     }
   }
 
-  // Leere Slots sofort zeigen
   drivers.forEach(d => {
     if (!d.assetKey || d.assetKey === '') {
       const el = document.getElementById(`slot-p${d.position}`);
@@ -316,14 +319,10 @@ function startReveal(drivers) {
     const even = pair[0] % 2 === 0 ? pair[0] : pair[1];
     currentFeaturedPositions = [odd, even];
     showPanelDrivers(odd, even, drivers);
-    console.log('revealPair called:', pair, new Date().toISOString());
   }
 
-  // Erstes Paar nach 300ms
-  // Erstes Paar nach 300ms
   const firstStep = allSteps.shift();
   setTimeout(() => {
-    // Musik starten beim ersten Paar
     const music = document.getElementById('starting-grid-music');
     music.src = '/audio/starting-grid-music.mp3';
     music.loop = false;
@@ -332,7 +331,6 @@ function startReveal(drivers) {
 
     revealPair(firstStep);
 
-    // Rest alle 2000ms
     let step = 0;
     revealInterval = setInterval(() => {
       if (step >= allSteps.length) {
@@ -347,11 +345,9 @@ function startReveal(drivers) {
   }, 300);
 }
 
-// ── RESTART ──
 function restartOverlay(data) {
   if (revealInterval) { clearInterval(revealInterval); revealInterval = null; }
 
-  // Musik stoppen
   const music = document.getElementById('starting-grid-music');
   music.pause();
   music.currentTime = 0;
@@ -365,7 +361,6 @@ function restartOverlay(data) {
   setTimeout(() => startReveal(data.drivers), 500);
 }
 
-// ── POLLING ──
 let lastReplayAt = null;
 
 async function checkForUpdates() {
@@ -379,7 +374,6 @@ async function checkForUpdates() {
   } catch(e) { console.error(e); }
 }
 
-// ── INIT ──
 async function init() {
   try {
     await loadDriverPool();
