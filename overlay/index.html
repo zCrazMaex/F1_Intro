@@ -252,14 +252,18 @@ function showPanels(hasLeft, hasRight) {
 }
 
 function showPanelDrivers(posOdd, posEven, drivers) {
-  console.log('showPanelDrivers called:', posOdd, posEven, new Date().toISOString());
   const dLeft  = drivers.find(d => d.position === posOdd  && d.assetKey && d.assetKey !== '') || null;
   const dRight = drivers.find(d => d.position === posEven && d.assetKey && d.assetKey !== '') || null;
 
   hidePanels();
-  if (dLeft)  setPanel('left',  dLeft);
-  if (dRight) setPanel('right', dRight);
-  showPanels(dLeft !== null, dRight !== null);
+
+  // Warten bis die Ausblend-Transition (0.7s für Name, 0.6s für Position) fertig ist,
+  // BEVOR neue Daten gesetzt werden
+  setTimeout(() => {
+    if (dLeft)  setPanel('left',  dLeft);
+    if (dRight) setPanel('right', dRight);
+    showPanels(dLeft !== null, dRight !== null);
+  }, 750);
 }
 
 // ── REVEAL ANIMATION ──
