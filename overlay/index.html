@@ -319,15 +319,20 @@ function startReveal(drivers) {
   if (allSteps.length === 0) return;
 
   function revealPair(pair) {
+  const odd  = pair[0] % 2 === 1 ? pair[0] : pair[1];
+  const even = pair[0] % 2 === 0 ? pair[0] : pair[1];
+  currentFeaturedPositions = [odd, even];
+
+  // Slots in der Mitte verzögert aufdecken, synchron mit den Panels
+  setTimeout(() => {
     pair.forEach(pos => {
       const el = document.getElementById(`slot-p${pos}`);
       if (el) el.classList.add('reveal');
     });
-    const odd  = pair[0] % 2 === 1 ? pair[0] : pair[1];
-    const even = pair[0] % 2 === 0 ? pair[0] : pair[1];
-    currentFeaturedPositions = [odd, even];
-    showPanelDrivers(odd, even, drivers);
-  }
+  }, 1350);
+
+  showPanelDrivers(odd, even, drivers);
+}
 
   const firstStep = allSteps.shift();
   setTimeout(() => {
