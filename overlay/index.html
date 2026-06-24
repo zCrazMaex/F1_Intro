@@ -221,9 +221,9 @@ function hidePanels() {
 // Fallback: assets/drivers/reserve.png wenn das Fahrerbild fehlt
 function setPanel(side, driver) {
   const portrait = document.getElementById(`portrait-${side}`);
+  const logo     = document.getElementById(`logo-${side}`);
 
-  // Daten für Text/Logo sofort setzen (werden erst später eingeblendet)
-  document.getElementById(`logo-${side}`).src               = TEAM_LOGOS[driver.team] || '';
+  // Text-Daten sofort setzen (werden erst später eingeblendet)
   document.getElementById(`team-${side}`).textContent       = driver.team;
   document.getElementById(`pos-${side}-num`).textContent    = driver.position;
   document.getElementById(`pos-${side}-sfx`).textContent    = ordinalSuffix(driver.position);
@@ -232,14 +232,16 @@ function setPanel(side, driver) {
   document.getElementById(`name-${side}-last`).textContent  = last.toUpperCase();
   document.getElementById(`name-${side}-last`).style.color  = teamColor(driver.team);
 
-  // Bild im Hintergrund vorladen, erst wenn fertig geladen → src setzen
+  // Logo vorladen, erst wenn fertig geladen → src setzen
+  const preloadLogo = new Image();
+  preloadLogo.onload  = () => { logo.src = preloadLogo.src; };
+  preloadLogo.onerror = () => { logo.src = ''; };
+  preloadLogo.src = TEAM_LOGOS[driver.team] || '';
+
+  // Portrait vorladen, erst wenn fertig geladen → src setzen
   const preloadImg = new Image();
-  preloadImg.onload = () => {
-    portrait.src = preloadImg.src;
-  };
-  preloadImg.onerror = () => {
-    portrait.src = `${GITHUB_RAW}/reserve.png`;
-  };
+  preloadImg.onload  = () => { portrait.src = preloadImg.src; };
+  preloadImg.onerror = () => { portrait.src = `${GITHUB_RAW}/reserve.png`; };
   preloadImg.src = `${GITHUB_RAW}/${driver.assetKey}.png`;
 }
 
